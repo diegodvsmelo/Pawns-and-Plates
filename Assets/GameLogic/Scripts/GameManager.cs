@@ -1,13 +1,17 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Game State")]
+    public bool isGamePaused = false; // A variável mestra de pausa
+
     [Header("UI References")]
     public GameObject slotPrefab;
     public Transform slotsContainer;
-    public Transform rosterContainer; // NOVO: Arraste o container onde ficam os funcionários parados aqui!
+    public Transform rosterContainer;
     
     public MinigameUI minigameUI; 
     
@@ -21,6 +25,10 @@ public class GameManager : MonoBehaviour
     private List<Slot> rosterSlots = new List<Slot>();
     public int squadSlotNumbers = 6;
 
+    [Header("Mission Window UI")]
+    public TextMeshProUGUI missionTitleText;
+    public TextMeshProUGUI missionDescText;
+
     public List<EmployeeData> startingEmployees; 
     public GameObject employeeCardPrefab;
     private bool isMissionRunning = false;
@@ -33,25 +41,23 @@ public class GameManager : MonoBehaviour
         SpawnStartingCrew();
         ShowMap();
     }
+
     void Update()
     {
-        // 1. Verifica se temos uma missão aberta (missaoTeste != null)
-        // 2. Verifica se NÃO apertamos o botão dispatch ainda (!isMissionRunning)
-        //    (Pois não queremos que a barra mude enquanto o ponteiro está girando)
+        // Se o jogo estiver pausado, paramos atualizações visuais que dependem do tempo
+        if (isGamePaused) return;
+
         if (missaoTeste != null && !isMissionRunning)
         {
-            // Pega quem está nos slots AGORA
             List<EmployeeData> currentSquad = GetSquadFromSlots();
             
-            // Se tiver gente, calcula e mostra
             if (currentSquad.Count > 0)
             {
                 float chance = CalculateSquadChance(missaoTeste, currentSquad);
-                minigameUI.SetZoneSize(chance); // <--- Isso atualiza a barra verde ao vivo!
+                minigameUI.SetZoneSize(chance);
             }
             else
             {
-                // Se tirou todo mundo, a barra zera
                 minigameUI.SetZoneSize(0);
             }
         }
@@ -61,6 +67,7 @@ public class GameManager : MonoBehaviour
     {
         mapPanel.SetActive(true);
         missionPanel.SetActive(false);
+        // O Spawner agora checa o isGamePaused, então só precisamos garantir que ele está ativo
         spawner.StartSpawning();
     }
 
@@ -70,17 +77,26 @@ public class GameManager : MonoBehaviour
         missionPanel.SetActive(true);
 
         this.missaoTeste = task;
+
+        if (missionTitleText != null) missionTitleText.text = task.taskName;
+        if (missionDescText != null) missionDescText.text = task.description;
         
         GenerateSlotsForTask(task);
         
-        // CORREÇÃO 1: Reseta a UI para o ponteiro voltar a mexer
         minigameUI.ResetUI(); 
         minigameUI.SetZoneSize(0);
     }
 
+    public void CloseMissionWindow()
+    {
+        missaoTeste = null;
+        ReturnCrewToRoster();
+        missionPanel.SetActive(false);
+        ShowMap(); 
+    }
+
     void GenerateSlotsForTask(TaskData task)
     {
-        // Limpa slots antigos
         foreach (Transform child in slotsContainer)
         {
             Destroy(child.gameObject);
@@ -113,10 +129,7 @@ public class GameManager : MonoBehaviour
             float chance = CalculateSquadChance(missaoTeste, currentSquad);
             minigameUI.SetZoneSize(chance);
             
-            // --- NOVA LÓGICA DE CRÍTICO ---
-            bool isCritical = chance >= 100f; // Verifica se é 100% garantido
-            
-            // Passamos essa informação para a Coroutine
+            bool isCritical = chance >= 100f; 
             StartCoroutine(ProcessMissionResult(chance, isCritical));
         }
         else
@@ -127,37 +140,27 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ProcessMissionResult(float chancePercent, bool isCritical)
     {
-        // LÓGICA DO TEMPO:
         if (isCritical)
         {
             Debug.Log("CRÍTICO! 100% de chance! Finalização Imediata!");
-            // Não espera os 3 segundos. Passa direto.
-            // Podemos esperar uma fração de segundo só para não ser glitch visual
             yield return new WaitForSeconds(0.5f); 
         }
         else
         {
-            // Fluxo normal: Tensão de 3 segundos
             yield return new WaitForSeconds(3f);
         }
 
-        // Lógica de Sucesso (Se for crítico, é sucesso automático)
         float roll = Random.Range(0f, 100f);
         bool isSuccess = isCritical || (roll <= chancePercent);
 
-        // -- PARAR O PONTEIRO --
-        // (Sua lógica visual do ponteiro continua aqui...)
         float zoneWidth = (minigameUI.totalWidth * chancePercent) / 100f;
         if (zoneWidth >= minigameUI.totalWidth) zoneWidth = minigameUI.totalWidth - 1;
         float stopX = isSuccess ? Random.Range(0f, zoneWidth) : Random.Range(zoneWidth, minigameUI.totalWidth);
         minigameUI.StopPointer(stopX);
         
-        // -- RECOMPENSAS E XP --
         if (isSuccess)
         {
             Debug.Log("SUCESSO!");
-            
-            // Dinheiro e Fama
             resourceManager.ModifyMoney(missaoTeste.moneyReward);
             resourceManager.ModifyReputation(missaoTeste.reputationReward);
             if (dayCycleManager != null)
@@ -165,7 +168,6 @@ public class GameManager : MonoBehaviour
                 dayCycleManager.AddDailyEarnings(missaoTeste.moneyReward);
             }
 
-            // DISTRIBUIÇÃO DE XP (SUCESSO OU CRÍTICO)
             int xpToGive = isCritical ? missaoTeste.xpOnCritical : missaoTeste.xpOnSuccess;
             GiveSquadExperience(xpToGive);
         }
@@ -173,8 +175,6 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("FALHA!");
             resourceManager.ModifyReputation(-missaoTeste.reputationPenalty);
-            
-            // XP DE CONSOLAÇÃO (FALHA)
             GiveSquadExperience(missaoTeste.xpOnFailure);
         }
 
@@ -188,7 +188,7 @@ public class GameManager : MonoBehaviour
 
     void GiveSquadExperience(int amount)
     {
-        foreach (Slot slot in missionSlots) // Usa a lista missionSlots que já temos
+        foreach (Slot slot in missionSlots) 
         {
             if (slot.transform.childCount > 0)
             {
@@ -201,28 +201,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     void ReturnCrewToRoster()
     {
-        // Percorre cada slot da MISSÃO para ver se tem alguém lá
         foreach (Slot missionSlot in missionSlots)
         {
             if (missionSlot.transform.childCount > 0)
             {
-                // Achamos um funcionário preso na missão
                 Transform card = missionSlot.transform.GetChild(0);
                 Draggable draggable = card.GetComponent<Draggable>();
-
-                // Agora procuramos uma casa vazia no ROSTER
                 Slot emptyRosterSlot = FindFirstEmptyRosterSlot();
 
                 if (emptyRosterSlot != null)
                 {
-                    // Move a carta para o slot vazio encontrado
                     card.SetParent(emptyRosterSlot.transform);
-                    card.localPosition = Vector3.zero; // Centraliza
+                    card.localPosition = Vector3.zero; 
 
-                    // Atualiza a lógica do Draggable
                     if (draggable != null)
                     {
                         draggable.originalParent = emptyRosterSlot.transform;
@@ -231,11 +224,11 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     Debug.LogError("ERRO: Não há slots vazios no Roster para devolver o funcionário!");
-                    // Aqui você poderia destruir a carta ou jogar num limbo temporário
                 }
             }
         }
     }
+
     List<EmployeeData> GetSquadFromSlots()
     {
         List<EmployeeData> squad = new List<EmployeeData>();
@@ -252,8 +245,6 @@ public class GameManager : MonoBehaviour
 
     public float CalculateSquadChance(TaskData task, List<EmployeeData> squad)
     {
-        // (Use a mesma lógica de cálculo que você já tem funcionando)
-        // Vou resumir aqui para não ficar gigante, mas mantenha o seu código:
         float totalSquadScore = 0;
         float totalWeights = 0;
         foreach (var req in task.requirements) {
@@ -276,39 +267,27 @@ public class GameManager : MonoBehaviour
     {
         foreach (Slot slot in rosterSlots)
         {
-            // Se o slot não tem filhos, está vazio
-            if (slot.transform.childCount == 0)
-            {
-                return slot;
-            }
+            if (slot.transform.childCount == 0) return slot;
         }
         return null;
     }
+
     void SetupRosterSlots()
     {
         rosterSlots.Clear();
-
-        // Opção A: Se você já colocou os slots manualmente na Unity dentro do RosterContainer,
-        // apenas pegamos eles.
         foreach (Transform child in rosterContainer)
         {
             Slot slot = child.GetComponent<Slot>();
-            if (slot != null)
-            {
-                rosterSlots.Add(slot);
-            }
+            if (slot != null) rosterSlots.Add(slot);
         }
 
-        // Opção B (Recomendada): Se o Roster estiver vazio, criamos X slots (ex: 10)
         if (rosterSlots.Count == 0)
         {
             for (int i = 0; i < squadSlotNumbers; i++)
             {
                 GameObject newSlot = Instantiate(slotPrefab, rosterContainer);
                 Slot slotScript = newSlot.GetComponent<Slot>();
-
                 slotScript.isRoster = true;
-
                 rosterSlots.Add(slotScript);
             }
         }
@@ -321,12 +300,7 @@ public class GameManager : MonoBehaviour
             if (i < rosterSlots.Count)
             {
                 GameObject newCard = Instantiate(employeeCardPrefab, rosterSlots[i].transform);
-                
-                // MUDANÇA AQUI:
-                // Em vez de: newCard.GetComponent<EmployeeCard>().data = startingEmployees[i];
-                // Usamos o Setup para garantir que a cor mude:
                 newCard.GetComponent<EmployeeCard>().Setup(startingEmployees[i]);
-                
                 newCard.GetComponent<Draggable>().originalParent = rosterSlots[i].transform;
             }
         }
@@ -335,18 +309,12 @@ public class GameManager : MonoBehaviour
     void ConsumeSquadStamina()
     {
         int cost = missaoTeste.staminaCost;
-
         foreach (Slot slot in missionSlots)
         {
             if (slot.transform.childCount > 0)
             {
-                // Pega o componente EmployeeCard do objeto visual
                 EmployeeCard card = slot.transform.GetChild(0).GetComponent<EmployeeCard>();
-                
-                if (card != null)
-                {
-                    card.ConsumeStamina(cost);
-                }
+                if (card != null) card.ConsumeStamina(cost);
             }
         }
     }

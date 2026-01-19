@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
   m_Name: Clean Tables
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
-  taskName: Clean Tables
-  description: Retirar pratos e limpar mesa do cliente
+  taskName: LIMPAR MESAS
+  description: RETIRAR PRATOS, LIMPAR E ORGANIZAR MESA
+  timeLimit: 15
   maxSlots: 1
   requirements:
   - category: 2

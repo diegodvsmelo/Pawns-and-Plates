@@ -6,7 +6,6 @@ public class CharacterSheetUI : MonoBehaviour
 {
     [Header("Header Info")]
     public TextMeshProUGUI nameText;
-    // public TextMeshProUGUI descriptionText; 
     public TextMeshProUGUI pointsAvailableText;
 
     [Header("Stat Rows")]
@@ -16,23 +15,29 @@ public class CharacterSheetUI : MonoBehaviour
     public StatRowUI agilityRow;
 
     private EmployeeData currentData;
-    
-    // Callback: Quem eu devo avisar quando fechar?
     private System.Action onUpdateCallback;
 
-    // Variáveis temporárias
+    // MUDANÇA: Referência ao GameManager (o dono da pausa)
+    private GameManager gameManager;
+
     private int tempPoints;
     private int tempCooking, tempService, tempOperational, tempAgility;
 
-    // MUDANÇA: Adicionado parâmetro opcional 'onUpdate'
+    void Awake()
+    {
+        gameManager = FindFirstObjectByType<GameManager>();
+    }
+
     public void OpenSheet(EmployeeData data, System.Action onUpdate = null)
     {
         currentData = data;
-        onUpdateCallback = onUpdate; // Guarda a referência
+        onUpdateCallback = onUpdate; 
         
         gameObject.SetActive(true);
 
-        // Copia valores
+        // PAUSA GLOBAL
+        if (gameManager != null) gameManager.isGamePaused = true;
+
         tempPoints = data.skillPoints;
         tempCooking = data.cookingSkill;
         tempService = data.serviceSkill;
@@ -40,7 +45,6 @@ public class CharacterSheetUI : MonoBehaviour
         tempAgility = data.agility;
 
         nameText.text = data.employeeName;
-        // if(descriptionText) descriptionText.text = data.description;
 
         UpdateUI();
     }
@@ -69,7 +73,6 @@ public class CharacterSheetUI : MonoBehaviour
     void UpdateUI()
     {
         pointsAvailableText.text = $"Pontos Disponíveis: {tempPoints}";
-
         cookingRow.UpdateVisuals(tempCooking);
         serviceRow.UpdateVisuals(tempService);
         operationalRow.UpdateVisuals(tempOperational);
@@ -78,19 +81,25 @@ public class CharacterSheetUI : MonoBehaviour
 
     public void ConfirmChanges()
     {
-        // Salva definitivo
         currentData.cookingSkill = tempCooking;
         currentData.serviceSkill = tempService;
         currentData.operationalSkill = tempOperational;
         currentData.agility = tempAgility;
         currentData.skillPoints = tempPoints;
 
-        // MUDANÇA: Avisa o card para desligar o ícone (pois skillPoints agora pode ser 0)
-        if (onUpdateCallback != null)
-        {
-            onUpdateCallback.Invoke();
-        }
+        if (onUpdateCallback != null) onUpdateCallback.Invoke();
 
+        // RETIRA PAUSA GLOBAL
+        if (gameManager != null) gameManager.isGamePaused = false;
+
+        gameObject.SetActive(false);
+    }
+
+    public void CloseWithoutSaving()
+    {
+        // RETIRA PAUSA GLOBAL
+        if (gameManager != null) gameManager.isGamePaused = false;
+        
         gameObject.SetActive(false);
     }
 }

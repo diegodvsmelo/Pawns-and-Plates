@@ -15,6 +15,9 @@ public class TaskData : ScriptableObject
     [Header("Task Info")]
     public string taskName;
     [TextArea] public string description;
+    
+    [Header("Time Settings")]
+    public float timeLimit = 15f;
 
     [Header("Constraints")]
     [Tooltip("Quantos funcionários cabem nesta missão?")]
@@ -39,6 +42,8 @@ public class TaskData : ScriptableObject
     public int xpOnSuccess;   
     public int xpOnFailure;   
     public int xpOnCritical; //Quando chance for 100%
+
+    
 }
 
 [System.Serializable]

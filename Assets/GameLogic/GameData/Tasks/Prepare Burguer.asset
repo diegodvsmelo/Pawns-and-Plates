@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
   m_Name: Prepare Burguer
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
-  taskName: Prepare Burguer
+  taskName: FAZER HAMBURGUER
   description: Assar e empratar hamburguer
+  timeLimit: 15
   maxSlots: 2
   requirements:
   - category: 0

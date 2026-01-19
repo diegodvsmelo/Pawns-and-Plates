@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
   m_Name: VIP Service
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
-  taskName: VIP Service
-  description: Atender o pedido de um cliente exigente
+  taskName: SERVICO VIP
+  description: ATENDER O PEDIDO DE UM CLIENTE IMPORTANTE E EXIGENTE
+  timeLimit: 15
   maxSlots: 1
   requirements:
   - category: 1
