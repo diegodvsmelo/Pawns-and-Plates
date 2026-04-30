@@ -1,0 +1,4 @@
+repository "Protótipo Displate 2026-04-30_16-13-08/Displate@4673689228451@cloud"
+  path "/"
+    br "/main"
+    co "/main"
