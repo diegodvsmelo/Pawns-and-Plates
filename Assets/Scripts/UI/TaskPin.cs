@@ -1,50 +1,58 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class TaskPin : MonoBehaviour
 {
     public TaskData data;
-    
-    [Header("UI")]
-    public Slider timerSlider; 
 
-    private System.Action<TaskData> onClickCallback;
+    [Header("UI")]
+    public Slider timerSlider;
+
+    // OBSERVERS
+    public event Action<TaskPin> OnExpired;
+    public event Action<TaskPin> OnClicked;
+    public event Action<TaskPin, float> OnTimerChanged;
+
+    private Action<TaskData> onClickCallback;
     private float timeRemaining;
-    private ResourceManager resourceManager; 
-    
-    // MUDANÇA: Referência ao GameManager
+
+    private ResourceManager resourceManager;
     private GameManager gameManager;
 
-    public void Setup(TaskData taskData, System.Action<TaskData> callback)
+    public void Setup(TaskData taskData, Action<TaskData> callback)
     {
-        this.data = taskData;
-        this.onClickCallback = callback;
-        
+        data = taskData;
+        onClickCallback = callback;
+
         timeRemaining = taskData.timeLimit;
+
         if (timerSlider != null)
         {
             timerSlider.maxValue = taskData.timeLimit;
             timerSlider.value = timeRemaining;
         }
 
-        resourceManager = FindFirstObjectByType<ResourceManager>();
-        
-        // Busca o chefe para saber se pode contar tempo
-        gameManager = FindFirstObjectByType<GameManager>();
+        resourceManager = ResourceManager.Instance;
+        gameManager = GameManager.Instance;
     }
 
-    void Update()
+    private void Update()
     {
-        // Se o GameManager existir e estiver pausado, NÃO FAZ NADA.
-        if (gameManager != null && gameManager.isGamePaused) return;
+        if (gameManager != null && gameManager.isGamePaused)
+            return;
 
-        // Se chegou aqui, o jogo está rodando
         if (timeRemaining > 0)
         {
             timeRemaining -= Time.deltaTime;
 
+            if (timeRemaining < 0)
+                timeRemaining = 0;
+
             if (timerSlider != null)
                 timerSlider.value = timeRemaining;
+
+            OnTimerChanged?.Invoke(this, timeRemaining);
 
             if (timeRemaining <= 0)
             {
@@ -53,23 +61,26 @@ public class TaskPin : MonoBehaviour
         }
     }
 
-    void HandleExpiration()
+    private void HandleExpiration()
     {
         Debug.Log($"Tarefa {data.taskName} expirou! Cliente foi embora.");
+
+        OnExpired?.Invoke(this);
 
         if (resourceManager != null)
         {
             resourceManager.ModifyReputation(-data.reputationPenalty);
         }
+
         Destroy(gameObject);
     }
 
     public void OnClick()
     {
-        if (onClickCallback != null)
-        {
-            onClickCallback.Invoke(data);
-        }
+        OnClicked?.Invoke(this);
+
+        onClickCallback?.Invoke(data);
+
         Destroy(gameObject);
     }
 }

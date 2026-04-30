@@ -1,8 +1,11 @@
 using UnityEngine;
-using TMPro; // Necessário para usar textos modernos
+using TMPro;
+using System;
 
 public class ResourceManager : MonoBehaviour
 {
+    public static ResourceManager Instance { get; private set; }
+
     [Header("UI References")]
     public TextMeshProUGUI moneyText;
     public TextMeshProUGUI reputationText;
@@ -11,32 +14,65 @@ public class ResourceManager : MonoBehaviour
     public int currentMoney = 100;
     public int currentReputation = 50;
 
-    void Start()
+    // OBSERVERS
+    public event Action<int> OnMoneyChanged;
+    public event Action<int> OnReputationChanged;
+    public event Action OnMoneyInsufficient;
+    public event Action OnReputationReachedZero;
+
+    private void Awake()
     {
-        UpdateUI();
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        NotifyAll();
     }
 
     public void ModifyMoney(int amount)
     {
         currentMoney += amount;
-        UpdateUI();
+
+        OnMoneyChanged?.Invoke(currentMoney);
+    }
+
+    public bool TrySpendMoney(int amount)
+    {
+        if (currentMoney < amount)
+        {
+            OnMoneyInsufficient?.Invoke();
+            return false;
+        }
+
+        ModifyMoney(-amount);
+        return true;
     }
 
     public void ModifyReputation(int amount)
     {
         currentReputation += amount;
-        
-        if (currentReputation < 0) currentReputation = 0;
-        
-        // (Futuramente: Se chegar a 0 -> Game Over)
-        
-        UpdateUI();
+
+        if (currentReputation < 0)
+            currentReputation = 0;
+
+        OnReputationChanged?.Invoke(currentReputation);
+
+        if (currentReputation <= 0)
+        {
+            OnReputationReachedZero?.Invoke();
+        }
     }
 
-    void UpdateUI()
+    private void NotifyAll()
     {
-        // Atualiza os textos na tela
-        if (moneyText != null) moneyText.text = $"$: {currentMoney}";
-        if (reputationText != null) reputationText.text = $"*: {currentReputation}";
+        OnMoneyChanged?.Invoke(currentMoney);
+        OnReputationChanged?.Invoke(currentReputation);
     }
 }

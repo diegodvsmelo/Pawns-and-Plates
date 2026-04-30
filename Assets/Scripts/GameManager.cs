@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,52 +6,85 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     [Header("Game State")]
-    public bool isGamePaused = false; // A variável mestra de pausa
+    public bool isGamePaused = false;
 
     [Header("UI References")]
     public GameObject slotPrefab;
     public Transform slotsContainer;
     public Transform rosterContainer;
-    
-    public MinigameUI minigameUI; 
-    
+
+    public MinigameUI minigameUI;
+
     [Header("UI Panels")]
     public GameObject mapPanel;
     public GameObject missionPanel;
     public TaskSpawner spawner;
 
     public TaskData missaoTeste;
-    private List<Slot> missionSlots = new List<Slot>(); 
+
+    private List<Slot> missionSlots = new List<Slot>();
     private List<Slot> rosterSlots = new List<Slot>();
+
     public int squadSlotNumbers = 6;
 
     [Header("Mission Window UI")]
     public TextMeshProUGUI missionTitleText;
     public TextMeshProUGUI missionDescText;
 
-    public List<EmployeeData> startingEmployees; 
+    public List<EmployeeData> startingEmployees;
     public GameObject employeeCardPrefab;
+
     private bool isMissionRunning = false;
+
     public ResourceManager resourceManager;
     public DayCycleManager dayCycleManager;
-    
-    void Start()
+
+    // OBSERVERS
+    public event Action<TaskData> OnMissionWindowOpened;
+    public event Action<TaskData> OnMissionWindowClosed;
+    public event Action<TaskData> OnMissionStarted;
+    public event Action<TaskData, bool, bool> OnMissionFinished;
+    public event Action<List<EmployeeData>> OnSquadChanged;
+
+    private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        if (resourceManager == null)
+            resourceManager = ResourceManager.Instance;
+
+        if (dayCycleManager == null)
+            dayCycleManager = DayCycleManager.Instance;
+
+        if (spawner == null)
+            spawner = TaskSpawner.Instance;
+
         SetupRosterSlots();
         SpawnStartingCrew();
         ShowMap();
     }
 
-    void Update()
+    private void Update()
     {
-        // Se o jogo estiver pausado, paramos atualizações visuais que dependem do tempo
-        if (isGamePaused) return;
+        if (isGamePaused)
+            return;
 
         if (missaoTeste != null && !isMissionRunning)
         {
             List<EmployeeData> currentSquad = GetSquadFromSlots();
-            
+
             if (currentSquad.Count > 0)
             {
                 float chance = CalculateSquadChance(missaoTeste, currentSquad);
@@ -65,48 +99,68 @@ public class GameManager : MonoBehaviour
 
     public void ShowMap()
     {
-        mapPanel.SetActive(true);
-        missionPanel.SetActive(false);
-        // O Spawner agora checa o isGamePaused, então só precisamos garantir que ele está ativo
-        spawner.StartSpawning();
+        if (mapPanel != null)
+            mapPanel.SetActive(true);
+
+        if (missionPanel != null)
+            missionPanel.SetActive(false);
+
+        if (spawner != null)
+            spawner.StartSpawning();
     }
 
     public void OpenMissionWindow(TaskData task)
     {
-        mapPanel.SetActive(false);
-        missionPanel.SetActive(true);
+        if (mapPanel != null)
+            mapPanel.SetActive(false);
 
-        this.missaoTeste = task;
+        if (missionPanel != null)
+            missionPanel.SetActive(true);
 
-        if (missionTitleText != null) missionTitleText.text = task.taskName;
-        if (missionDescText != null) missionDescText.text = task.description;
-        
+        missaoTeste = task;
+
+        if (missionTitleText != null)
+            missionTitleText.text = task.taskName;
+
+        if (missionDescText != null)
+            missionDescText.text = task.description;
+
         GenerateSlotsForTask(task);
-        
-        minigameUI.ResetUI(); 
-        minigameUI.SetZoneSize(0);
+
+        if (minigameUI != null)
+        {
+            minigameUI.ResetUI();
+            minigameUI.SetZoneSize(0);
+        }
+
+        OnMissionWindowOpened?.Invoke(task);
     }
 
     public void CloseMissionWindow()
     {
         missaoTeste = null;
         ReturnCrewToRoster();
-        missionPanel.SetActive(false);
-        ShowMap(); 
+
+        if (missionPanel != null)
+            missionPanel.SetActive(false);
+
+        ShowMap();
     }
 
-    void GenerateSlotsForTask(TaskData task)
+    private void GenerateSlotsForTask(TaskData task)
     {
         foreach (Transform child in slotsContainer)
         {
             Destroy(child.gameObject);
         }
+
         missionSlots.Clear();
 
         for (int i = 0; i < task.maxSlots; i++)
         {
             GameObject newSlotObj = Instantiate(slotPrefab, slotsContainer);
             Slot slotScript = newSlotObj.GetComponent<Slot>();
+
             if (slotScript != null)
             {
                 slotScript.isRoster = false;
@@ -117,19 +171,24 @@ public class GameManager : MonoBehaviour
 
     public void OnDispatchButtonPress()
     {
-        if (isMissionRunning) return;
+        if (isMissionRunning)
+            return;
 
         List<EmployeeData> currentSquad = GetSquadFromSlots();
-        
+
         if (currentSquad.Count > 0)
         {
             isMissionRunning = true;
             ConsumeSquadStamina();
 
+            OnMissionStarted?.Invoke(missaoTeste);
+
             float chance = CalculateSquadChance(missaoTeste, currentSquad);
-            minigameUI.SetZoneSize(chance);
-            
-            bool isCritical = chance >= 100f; 
+
+            if (minigameUI != null)
+                minigameUI.SetZoneSize(chance);
+
+            bool isCritical = chance >= 100f;
             StartCoroutine(ProcessMissionResult(chance, isCritical));
         }
         else
@@ -138,31 +197,45 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator ProcessMissionResult(float chancePercent, bool isCritical)
+    private IEnumerator ProcessMissionResult(float chancePercent, bool isCritical)
     {
         if (isCritical)
         {
             Debug.Log("CRÍTICO! 100% de chance! Finalização Imediata!");
-            yield return new WaitForSeconds(0.5f); 
+            yield return new WaitForSeconds(0.5f);
         }
         else
         {
             yield return new WaitForSeconds(3f);
         }
 
-        float roll = Random.Range(0f, 100f);
-        bool isSuccess = isCritical || (roll <= chancePercent);
+        float roll = UnityEngine.Random.Range(0f, 100f);
+        bool isSuccess = isCritical || roll <= chancePercent;
 
-        float zoneWidth = (minigameUI.totalWidth * chancePercent) / 100f;
-        if (zoneWidth >= minigameUI.totalWidth) zoneWidth = minigameUI.totalWidth - 1;
-        float stopX = isSuccess ? Random.Range(0f, zoneWidth) : Random.Range(zoneWidth, minigameUI.totalWidth);
-        minigameUI.StopPointer(stopX);
-        
+        if (minigameUI != null)
+        {
+            float zoneWidth = (minigameUI.totalWidth * chancePercent) / 100f;
+
+            if (zoneWidth >= minigameUI.totalWidth)
+                zoneWidth = minigameUI.totalWidth - 1;
+
+            float stopX = isSuccess
+                ? UnityEngine.Random.Range(0f, zoneWidth)
+                : UnityEngine.Random.Range(zoneWidth, minigameUI.totalWidth);
+
+            minigameUI.StopPointer(stopX);
+        }
+
         if (isSuccess)
         {
             Debug.Log("SUCESSO!");
-            resourceManager.ModifyMoney(missaoTeste.moneyReward);
-            resourceManager.ModifyReputation(missaoTeste.reputationReward);
+
+            if (resourceManager != null)
+            {
+                resourceManager.ModifyMoney(missaoTeste.moneyReward);
+                resourceManager.ModifyReputation(missaoTeste.reputationReward);
+            }
+
             if (dayCycleManager != null)
             {
                 dayCycleManager.AddDailyEarnings(missaoTeste.moneyReward);
@@ -174,25 +247,32 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.Log("FALHA!");
-            resourceManager.ModifyReputation(-missaoTeste.reputationPenalty);
+
+            if (resourceManager != null)
+                resourceManager.ModifyReputation(-missaoTeste.reputationPenalty);
+
             GiveSquadExperience(missaoTeste.xpOnFailure);
         }
 
+        OnMissionFinished?.Invoke(missaoTeste, isSuccess, isCritical);
+
         yield return new WaitForSeconds(2f);
+
         ReturnCrewToRoster();
         ShowMap();
-        
+
         missaoTeste = null;
         isMissionRunning = false;
     }
 
-    void GiveSquadExperience(int amount)
+    private void GiveSquadExperience(int amount)
     {
-        foreach (Slot slot in missionSlots) 
+        foreach (Slot slot in missionSlots)
         {
             if (slot.transform.childCount > 0)
             {
                 EmployeeCard card = slot.transform.GetChild(0).GetComponent<EmployeeCard>();
+
                 if (card != null)
                 {
                     card.AddExperience(amount);
@@ -201,7 +281,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void ReturnCrewToRoster()
+    private void ReturnCrewToRoster()
     {
         foreach (Slot missionSlot in missionSlots)
         {
@@ -214,7 +294,7 @@ public class GameManager : MonoBehaviour
                 if (emptyRosterSlot != null)
                 {
                     card.SetParent(emptyRosterSlot.transform);
-                    card.localPosition = Vector3.zero; 
+                    card.localPosition = Vector3.zero;
 
                     if (draggable != null)
                     {
@@ -229,17 +309,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    List<EmployeeData> GetSquadFromSlots()
+    private List<EmployeeData> GetSquadFromSlots()
     {
         List<EmployeeData> squad = new List<EmployeeData>();
+
         foreach (Slot slot in missionSlots)
         {
             if (slot.transform.childCount > 0)
             {
                 EmployeeCard card = slot.transform.GetChild(0).GetComponent<EmployeeCard>();
-                if (card != null && card.data != null) squad.Add(card.data);
+
+                if (card != null && card.data != null)
+                    squad.Add(card.data);
             }
         }
+
         return squad;
     }
 
@@ -247,38 +331,55 @@ public class GameManager : MonoBehaviour
     {
         float totalSquadScore = 0;
         float totalWeights = 0;
-        foreach (var req in task.requirements) {
+
+        foreach (var req in task.requirements)
+        {
             float attrSum = 0;
-            foreach (var mem in squad) {
-                if (req.category == TaskCategory.Cooking) attrSum += mem.cookingSkill;
-                else if (req.category == TaskCategory.Service) attrSum += mem.serviceSkill;
-                else if (req.category == TaskCategory.Operational) attrSum += mem.operationalSkill;
-                else if (req.category == TaskCategory.Agility) attrSum += mem.agility;
+
+            foreach (var mem in squad)
+            {
+                if (req.category == TaskCategory.Cooking)
+                    attrSum += mem.cookingSkill;
+                else if (req.category == TaskCategory.Service)
+                    attrSum += mem.serviceSkill;
+                else if (req.category == TaskCategory.Operational)
+                    attrSum += mem.operationalSkill;
+                else if (req.category == TaskCategory.Agility)
+                    attrSum += mem.agility;
             }
+
             totalSquadScore += attrSum * req.weight;
             totalWeights += req.weight;
         }
-        if (totalWeights == 0) return 0;
+
+        if (totalWeights == 0)
+            return 0;
+
         float finalScore = totalSquadScore / totalWeights;
         return Mathf.Clamp((finalScore / task.difficultyPoints) * 100f, 0f, 100f);
     }
 
-    Slot FindFirstEmptyRosterSlot()
+    private Slot FindFirstEmptyRosterSlot()
     {
         foreach (Slot slot in rosterSlots)
         {
-            if (slot.transform.childCount == 0) return slot;
+            if (slot.transform.childCount == 0)
+                return slot;
         }
+
         return null;
     }
 
-    void SetupRosterSlots()
+    private void SetupRosterSlots()
     {
         rosterSlots.Clear();
+
         foreach (Transform child in rosterContainer)
         {
             Slot slot = child.GetComponent<Slot>();
-            if (slot != null) rosterSlots.Add(slot);
+
+            if (slot != null)
+                rosterSlots.Add(slot);
         }
 
         if (rosterSlots.Count == 0)
@@ -293,28 +394,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void SpawnStartingCrew()
+    private void SpawnStartingCrew()
     {
         for (int i = 0; i < startingEmployees.Count; i++)
         {
             if (i < rosterSlots.Count)
             {
                 GameObject newCard = Instantiate(employeeCardPrefab, rosterSlots[i].transform);
-                newCard.GetComponent<EmployeeCard>().Setup(startingEmployees[i]);
-                newCard.GetComponent<Draggable>().originalParent = rosterSlots[i].transform;
+
+                EmployeeCard employeeCard = newCard.GetComponent<EmployeeCard>();
+                if (employeeCard != null)
+                    employeeCard.Setup(startingEmployees[i]);
+
+                Draggable draggable = newCard.GetComponent<Draggable>();
+                if (draggable != null)
+                    draggable.originalParent = rosterSlots[i].transform;
             }
         }
     }
 
-    void ConsumeSquadStamina()
+    private void ConsumeSquadStamina()
     {
         int cost = missaoTeste.staminaCost;
+
         foreach (Slot slot in missionSlots)
         {
             if (slot.transform.childCount > 0)
             {
                 EmployeeCard card = slot.transform.GetChild(0).GetComponent<EmployeeCard>();
-                if (card != null) card.ConsumeStamina(cost);
+
+                if (card != null)
+                    card.ConsumeStamina(cost);
             }
         }
     }

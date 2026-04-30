@@ -2,10 +2,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class EmployeeCard : MonoBehaviour, IPointerClickHandler
 {
-    public EmployeeData data; 
+    public EmployeeData data;
     public Image backgroundImage;
 
     [Header("Stamina System")]
@@ -16,39 +17,41 @@ public class EmployeeCard : MonoBehaviour, IPointerClickHandler
     [Header("Level & Upgrade")]
     public TextMeshProUGUI levelText;
     public Slider xpSlider;
-    public GameObject upgradeIcon; // O ícone de exclamação
+    public GameObject upgradeIcon;
 
-    // Referência para o painel de ficha de personagem
+    // OBSERVERS
+    public event Action<EmployeeCard, float> OnStaminaChanged;
+    public event Action<EmployeeCard, int> OnExperienceChanged;
+    public event Action<EmployeeCard, int> OnLevelChanged;
+    public event Action<EmployeeCard> OnLevelUp;
+    public event Action<EmployeeCard> OnSkillPointsChanged;
+
     private CharacterSheetUI characterSheet;
 
-    void Start()
+    private void Start()
     {
         characterSheet = FindFirstObjectByType<CharacterSheetUI>(FindObjectsInactive.Include);
     }
 
-    void Update()
+    private void Update()
     {
         if (transform.parent != null)
         {
             Slot mySlot = transform.parent.GetComponent<Slot>();
-            
-            // Só regenera se for um slot do Roster
+
             if (mySlot != null && mySlot.isRoster)
             {
-                RecoverStamina(Time.deltaTime * staminaRegen); 
+                RecoverStamina(Time.deltaTime * staminaRegen);
             }
         }
     }
 
-    // --- INTERAÇÃO CORRIGIDA ---
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             if (characterSheet != null)
             {
-                // MUDANÇA: Passamos 'UpdateLevelUI' como callback
-                // Assim, quando fechar o painel, ele avisa este card para se atualizar
                 characterSheet.OpenSheet(data, UpdateLevelUI);
             }
             else
@@ -57,35 +60,58 @@ public class EmployeeCard : MonoBehaviour, IPointerClickHandler
             }
         }
     }
-    // ---------------------------
 
     public void Setup(EmployeeData newData)
     {
-        this.data = newData;
+        data = newData;
 
-        if (backgroundImage == null) backgroundImage = GetComponent<Image>();
-        if (backgroundImage != null) backgroundImage.color = newData.cardColor;
+        if (backgroundImage == null)
+            backgroundImage = GetComponent<Image>();
+
+        if (backgroundImage != null)
+            backgroundImage.color = newData.cardColor;
 
         currentStamina = newData.maxStamina;
+
         UpdateStaminaUI();
-        UpdateLevelUI(); 
+        UpdateLevelUI();
+
+        OnStaminaChanged?.Invoke(this, currentStamina);
+        OnExperienceChanged?.Invoke(this, data.currentXP);
+        OnLevelChanged?.Invoke(this, data.currentLevel);
     }
 
     public void ConsumeStamina(int amount)
     {
         currentStamina -= amount;
-        if (currentStamina < 0) currentStamina = 0;
+
+        if (currentStamina < 0)
+            currentStamina = 0;
+
         UpdateStaminaUI();
+        OnStaminaChanged?.Invoke(this, currentStamina);
     }
 
     public void RecoverStamina(float amount)
     {
+        if (data == null)
+            return;
+
+        float previousStamina = currentStamina;
+
         currentStamina += amount;
-        if (currentStamina > data.maxStamina) currentStamina = data.maxStamina;
+
+        if (currentStamina > data.maxStamina)
+            currentStamina = data.maxStamina;
+
+        if (Mathf.Approximately(previousStamina, currentStamina))
+            return;
+
         UpdateStaminaUI();
+        OnStaminaChanged?.Invoke(this, currentStamina);
     }
 
-    void UpdateStaminaUI()
+    private void UpdateStaminaUI()
     {
         if (staminaSlider != null)
         {
@@ -97,28 +123,43 @@ public class EmployeeCard : MonoBehaviour, IPointerClickHandler
     public void AddExperience(int amount)
     {
         data.currentXP += amount;
-        // Debug.Log($"{data.employeeName} ganhou {amount} XP!");
 
         CheckLevelUp();
+
         UpdateLevelUI();
+
+        OnExperienceChanged?.Invoke(this, data.currentXP);
+        OnLevelChanged?.Invoke(this, data.currentLevel);
     }
 
-    void CheckLevelUp()
+    private void CheckLevelUp()
     {
+        bool leveledUp = false;
+
         while (data.currentXP >= data.GetXpToNextLevel())
         {
             data.currentXP -= data.GetXpToNextLevel();
             data.currentLevel++;
-            data.skillPoints+=5; // Ganha ponto 
-            
+            data.skillPoints += 5;
+
+            leveledUp = true;
+
             Debug.Log($"LEVEL UP! {data.employeeName} nv. {data.currentLevel}. Pontos: {data.skillPoints}");
+
+            OnLevelUp?.Invoke(this);
+            OnSkillPointsChanged?.Invoke(this);
+        }
+
+        if (leveledUp)
+        {
+            OnLevelChanged?.Invoke(this, data.currentLevel);
         }
     }
 
-    // Chamado no Setup, no LevelUp e AGORA chamado também quando o Painel fecha
     public void UpdateLevelUI()
     {
-        if (levelText != null) levelText.text = $"Nv. {data.currentLevel}";
+        if (levelText != null)
+            levelText.text = $"Nv. {data.currentLevel}";
 
         if (xpSlider != null)
         {
@@ -126,16 +167,16 @@ public class EmployeeCard : MonoBehaviour, IPointerClickHandler
             xpSlider.value = data.currentXP;
         }
 
-        // LÓGICA DO ÍCONE
         if (upgradeIcon != null)
         {
             bool hasPoints = data.skillPoints > 0;
-            
-            // Só ativa/desativa se o estado mudou para economizar processamento
+
             if (upgradeIcon.activeSelf != hasPoints)
             {
                 upgradeIcon.SetActive(hasPoints);
             }
         }
+
+        OnSkillPointsChanged?.Invoke(this);
     }
 }

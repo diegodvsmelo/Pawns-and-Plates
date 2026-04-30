@@ -1,6 +1,6 @@
-using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
+using UnityEngine;
+using System;
 
 public class CharacterSheetUI : MonoBehaviour
 {
@@ -14,29 +14,40 @@ public class CharacterSheetUI : MonoBehaviour
     public StatRowUI operationalRow;
     public StatRowUI agilityRow;
 
-    private EmployeeData currentData;
-    private System.Action onUpdateCallback;
+    // OBSERVERS
+    public event Action<EmployeeData> OnSheetOpened;
+    public event Action<EmployeeData> OnSheetConfirmed;
+    public event Action<EmployeeData> OnSheetClosedWithoutSaving;
+    public event Action<EmployeeData> OnTempStatsChanged;
 
-    // MUDANÇA: Referência ao GameManager (o dono da pausa)
+    private EmployeeData currentData;
+    private Action onUpdateCallback;
+
     private GameManager gameManager;
 
     private int tempPoints;
-    private int tempCooking, tempService, tempOperational, tempAgility;
+    private int tempCooking;
+    private int tempService;
+    private int tempOperational;
+    private int tempAgility;
 
-    void Awake()
+    private void Awake()
     {
-        gameManager = FindFirstObjectByType<GameManager>();
+        gameManager = GameManager.Instance;
     }
 
-    public void OpenSheet(EmployeeData data, System.Action onUpdate = null)
+    public void OpenSheet(EmployeeData data, Action onUpdate = null)
     {
+        if (gameManager == null)
+            gameManager = GameManager.Instance;
+
         currentData = data;
-        onUpdateCallback = onUpdate; 
-        
+        onUpdateCallback = onUpdate;
+
         gameObject.SetActive(true);
 
-        // PAUSA GLOBAL
-        if (gameManager != null) gameManager.isGamePaused = true;
+        if (gameManager != null)
+            gameManager.isGamePaused = true;
 
         tempPoints = data.skillPoints;
         tempCooking = data.cookingSkill;
@@ -44,14 +55,18 @@ public class CharacterSheetUI : MonoBehaviour
         tempOperational = data.operationalSkill;
         tempAgility = data.agility;
 
-        nameText.text = data.employeeName;
+        if (nameText != null)
+            nameText.text = data.employeeName;
 
         UpdateUI();
+
+        OnSheetOpened?.Invoke(currentData);
     }
 
     public void ModifyStat(string statName, int change)
     {
-        if (change > 0 && tempPoints < change) return;
+        if (change > 0 && tempPoints < change)
+            return;
 
         if (change < 0)
         {
@@ -61,18 +76,27 @@ public class CharacterSheetUI : MonoBehaviour
             if (statName == "agility" && tempAgility <= currentData.agility) return;
         }
 
-        if (statName == "cooking") tempCooking += change;
-        else if (statName == "service") tempService += change;
-        else if (statName == "operational") tempOperational += change;
-        else if (statName == "agility") tempAgility += change;
+        if (statName == "cooking")
+            tempCooking += change;
+        else if (statName == "service")
+            tempService += change;
+        else if (statName == "operational")
+            tempOperational += change;
+        else if (statName == "agility")
+            tempAgility += change;
 
         tempPoints -= change;
+
         UpdateUI();
+
+        OnTempStatsChanged?.Invoke(currentData);
     }
 
-    void UpdateUI()
+    private void UpdateUI()
     {
-        pointsAvailableText.text = $"Pontos Disponíveis: {tempPoints}";
+        if (pointsAvailableText != null)
+            pointsAvailableText.text = $"Pontos Disponíveis: {tempPoints}";
+
         cookingRow.UpdateVisuals(tempCooking);
         serviceRow.UpdateVisuals(tempService);
         operationalRow.UpdateVisuals(tempOperational);
@@ -87,19 +111,23 @@ public class CharacterSheetUI : MonoBehaviour
         currentData.agility = tempAgility;
         currentData.skillPoints = tempPoints;
 
-        if (onUpdateCallback != null) onUpdateCallback.Invoke();
+        onUpdateCallback?.Invoke();
 
-        // RETIRA PAUSA GLOBAL
-        if (gameManager != null) gameManager.isGamePaused = false;
+        OnSheetConfirmed?.Invoke(currentData);
+
+        if (gameManager != null)
+            gameManager.isGamePaused = false;
 
         gameObject.SetActive(false);
     }
 
     public void CloseWithoutSaving()
     {
-        // RETIRA PAUSA GLOBAL
-        if (gameManager != null) gameManager.isGamePaused = false;
-        
+        OnSheetClosedWithoutSaving?.Invoke(currentData);
+
+        if (gameManager != null)
+            gameManager.isGamePaused = false;
+
         gameObject.SetActive(false);
     }
 }
@@ -108,8 +136,10 @@ public class CharacterSheetUI : MonoBehaviour
 public class StatRowUI
 {
     public TextMeshProUGUI valueText;
+
     public void UpdateVisuals(float value)
     {
-        valueText.text = value.ToString();
+        if (valueText != null)
+            valueText.text = value.ToString();
     }
 }
