@@ -115,9 +115,12 @@ public class FeedbackManager : MonoBehaviour
         Debug.Log($"[Observer] Task spawnada: {taskPin.data.taskName}");
     }
 
-    private void HandleTaskSelected(TaskData task)
+    private void HandleTaskSelected(TaskPin taskPin)
     {
-        Debug.Log($"[Observer] Task selecionada: {task.taskName}");
+        if (taskPin == null || taskPin.data == null)
+            return;
+
+        Debug.Log($"[Observer] Task selecionada: {taskPin.data.taskName}");
     }
 
     private void HandleMissionStarted(TaskData task)

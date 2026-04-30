@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Random = UnityEngine.Random;
 
 public class TaskSpawner : MonoBehaviour
 {
@@ -19,11 +18,10 @@ public class TaskSpawner : MonoBehaviour
     [Header("Data Source")]
     public List<TaskData> possibleTasks;
 
-    // OBSERVERS
     public event Action OnSpawningStarted;
     public event Action OnSpawningStopped;
     public event Action<TaskPin> OnTaskSpawned;
-    public event Action<TaskData> OnTaskSelected;
+    public event Action<TaskPin> OnTaskSelected;
 
     private bool isSpawningActive = false;
     private GameManager gameManager;
@@ -38,7 +36,6 @@ public class TaskSpawner : MonoBehaviour
         }
 
         Instance = this;
-        Debug.Log(this.gameObject.name);
     }
 
     private void Start()
@@ -78,7 +75,7 @@ public class TaskSpawner : MonoBehaviour
     {
         while (isSpawningActive)
         {
-            float waitTime = Random.Range(minSpawnTime, maxSpawnTime);
+            float waitTime = UnityEngine.Random.Range(minSpawnTime, maxSpawnTime);
             float counter = 0f;
 
             while (counter < waitTime)
@@ -109,14 +106,14 @@ public class TaskSpawner : MonoBehaviour
             return;
         }
 
-        TaskData randomTask = possibleTasks[Random.Range(0, possibleTasks.Count)];
+        TaskData randomTask = possibleTasks[UnityEngine.Random.Range(0, possibleTasks.Count)];
         GameObject newPin = Instantiate(pinPrefab, spawnArea);
 
         float width = spawnArea.rect.width;
         float height = spawnArea.rect.height;
 
-        float randomX = Random.Range(-width / 2f, width / 2f);
-        float randomY = Random.Range(-height / 2f, height / 2f);
+        float randomX = UnityEngine.Random.Range(-width / 2f, width / 2f);
+        float randomY = UnityEngine.Random.Range(-height / 2f, height / 2f);
 
         RectTransform pinRect = newPin.GetComponent<RectTransform>();
 
@@ -134,17 +131,20 @@ public class TaskSpawner : MonoBehaviour
         }
     }
 
-    private void OnTaskPinClicked(TaskData task)
+    private void OnTaskPinClicked(TaskPin taskPin)
     {
-        Debug.Log($"Jogador clicou na missão: {task.taskName}");
+        if (taskPin == null || taskPin.data == null)
+            return;
 
-        OnTaskSelected?.Invoke(task);
+        Debug.Log($"Jogador clicou na missão: {taskPin.data.taskName}");
+
+        OnTaskSelected?.Invoke(taskPin);
 
         StopSpawning();
 
         if (gameManager != null)
         {
-            gameManager.OpenMissionWindow(task);
+            gameManager.OpenMissionWindow(taskPin);
         }
     }
 }

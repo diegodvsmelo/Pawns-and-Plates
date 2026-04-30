@@ -2982,7 +2982,6 @@ GameObject:
   - component: {fileID: 474210868}
   - component: {fileID: 474210871}
   - component: {fileID: 474210870}
-  - component: {fileID: 474210869}
   m_Layer: 5
   m_Name: MapPanel
   m_TagString: Untagged
@@ -3009,26 +3008,6 @@ RectTransform:
   m_AnchoredPosition: {x: -82.5, y: -90}
   m_SizeDelta: {x: -165, y: -180}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &474210869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 474210867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb3d31c57b693f3449b9f3f8beb6469e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TaskSpawner
-  pinPrefab: {fileID: 344980891104134225, guid: 40414e13917c87743b02ef0536927aec, type: 3}
-  spawnArea: {fileID: 474210868}
-  minSpawnTime: 2
-  maxSpawnTime: 5
-  possibleTasks:
-  - {fileID: 11400000, guid: 2a95b47d264fe4f47a7fc11f33f7c7af, type: 2}
-  - {fileID: 11400000, guid: 1c9a71da5a6615c4eaeaaa5e2cc0f022, type: 2}
-  - {fileID: 11400000, guid: a91827b1d49b0524aa14b0e04a7a6307, type: 2}
 --- !u!114 &474210870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4760,7 +4739,7 @@ MonoBehaviour:
   minigameUI: {fileID: 1204408528}
   mapPanel: {fileID: 474210867}
   missionPanel: {fileID: 1362801152}
-  spawner: {fileID: 474210869}
+  spawner: {fileID: 0}
   missaoTeste: {fileID: 11400000, guid: 1c9a71da5a6615c4eaeaaa5e2cc0f022, type: 2}
   squadSlotNumbers: 5
   missionTitleText: {fileID: 734879876}
@@ -5496,6 +5475,7 @@ Transform:
   - {fileID: 2021675705}
   - {fileID: 1252499480}
   - {fileID: 42808325}
+  - {fileID: 1663371490}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1186363613
@@ -7288,6 +7268,58 @@ RectTransform:
   m_AnchoredPosition: {x: 0.0018005, y: 20.325}
   m_SizeDelta: {x: 1590.9, y: 497.19}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1663371489
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1663371490}
+  - component: {fileID: 1663371491}
+  m_Layer: 0
+  m_Name: TaskSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1663371490
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1663371489}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1169083387}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1663371491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1663371489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb3d31c57b693f3449b9f3f8beb6469e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TaskSpawner
+  pinPrefab: {fileID: 344980891104134225, guid: 40414e13917c87743b02ef0536927aec, type: 3}
+  spawnArea: {fileID: 474210868}
+  minSpawnTime: 2
+  maxSpawnTime: 5
+  possibleTasks:
+  - {fileID: 11400000, guid: 2a95b47d264fe4f47a7fc11f33f7c7af, type: 2}
+  - {fileID: 11400000, guid: 1c9a71da5a6615c4eaeaaa5e2cc0f022, type: 2}
+  - {fileID: 11400000, guid: a91827b1d49b0524aa14b0e04a7a6307, type: 2}
 --- !u!1 &1683971945
 GameObject:
   m_ObjectHideFlags: 0
@@ -8457,5 +8489,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 330585546}
   - {fileID: 410087041}
-  - {fileID: 1443698057}
   - {fileID: 1169083387}
+  - {fileID: 1443698057}

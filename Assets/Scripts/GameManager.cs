@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     public TaskSpawner spawner;
 
     public TaskData missaoTeste;
+    private TaskPin selectedTaskPin;
 
     private List<Slot> missionSlots = new List<Slot>();
     private List<Slot> rosterSlots = new List<Slot>();
@@ -109,8 +110,14 @@ public class GameManager : MonoBehaviour
             spawner.StartSpawning();
     }
 
-    public void OpenMissionWindow(TaskData task)
+    public void OpenMissionWindow(TaskPin taskPin)
     {
+        if (taskPin == null || taskPin.data == null)
+            return;
+
+        selectedTaskPin = taskPin;
+        TaskData task = taskPin.data;
+
         if (mapPanel != null)
             mapPanel.SetActive(false);
 
@@ -138,11 +145,23 @@ public class GameManager : MonoBehaviour
 
     public void CloseMissionWindow()
     {
+        TaskData closedTask = missaoTeste;
+
         missaoTeste = null;
+
         ReturnCrewToRoster();
+
+        if (selectedTaskPin != null)
+        {
+            selectedTaskPin.ResumeTimer();
+            selectedTaskPin = null;
+        }
 
         if (missionPanel != null)
             missionPanel.SetActive(false);
+
+        if (closedTask != null)
+            OnMissionWindowClosed?.Invoke(closedTask);
 
         ShowMap();
     }
@@ -259,6 +278,13 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
 
         ReturnCrewToRoster();
+
+        if (selectedTaskPin != null)
+        {
+            selectedTaskPin.CompleteAndDestroy();
+            selectedTaskPin = null;
+        }
+
         ShowMap();
 
         missaoTeste = null;
