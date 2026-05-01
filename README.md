@@ -141,9 +141,11 @@ More advanced systems such as emergent traits, complex random events, free layou
 * [ ] Restaurant expansion system
 * [ ] Hiring flow
 * [ ] Buff/debuff implementation
+* [ ] Visual Assets Creation and Implementation
 * [ ] Trait system integration
 * [ ] Final critic progression
 * [ ] Save/load
+* [ ] Game Feel
 
 ## Screenshots
 
