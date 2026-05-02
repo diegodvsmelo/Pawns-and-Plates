@@ -3,6 +3,14 @@ using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
+    [Header("UI Audio Clips")]
+    [SerializeField] private AudioClip uiHoverGeneral;
+    [SerializeField] private AudioClip uiHoverConfirm;
+    [SerializeField] private AudioClip uiHoverCancel;
+
+    [SerializeField] private AudioClip uiClickGeneral;
+    [SerializeField] private AudioClip uiClickConfirm;
+    [SerializeField] private AudioClip uiClickCancel;
     public static AudioManager Instance { get; private set; }
 
     [Header("Audio Sources")]
@@ -143,5 +151,49 @@ public class AudioManager : MonoBehaviour
             return;
 
         sfxSource.PlayOneShot(clip, SfxVolume);
+    }
+
+    public void PlayUiHover(ButtonAudioType buttonType)
+    {
+        AudioClip clip = null;
+
+        switch (buttonType)
+        {
+            case ButtonAudioType.Confirm:
+                clip = uiHoverConfirm;
+                break;
+
+            case ButtonAudioType.Cancel:
+                clip = uiHoverCancel;
+                break;
+
+            default:
+                clip = uiHoverGeneral;
+                break;
+        }
+
+        PlaySfx(clip);
+    }
+
+    public void PlayUiClick(ButtonAudioType buttonType)
+    {
+        AudioClip clip = null;
+
+        switch (buttonType)
+        {
+            case ButtonAudioType.Confirm:
+                clip = uiClickConfirm;
+                break;
+
+            case ButtonAudioType.Cancel:
+                clip = uiClickCancel;
+                break;
+
+            default:
+                clip = uiClickGeneral;
+                break;
+        }
+
+        PlaySfx(clip);
     }
 }
