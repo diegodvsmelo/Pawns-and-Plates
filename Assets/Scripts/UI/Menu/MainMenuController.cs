@@ -7,15 +7,26 @@ public class MainMenuController : MonoBehaviour
     [Header("Scene Names")]
     [SerializeField] private string mainSceneName = "Main";
 
+    [Header("UI Root")]
+    [SerializeField] private GameObject elements;
+
     [Header("Buttons")]
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button loadGameButton;
     [SerializeField] private Button optionsButton;
     [SerializeField] private Button exitButton;
 
+    [Header("Screens")]
+    [SerializeField] private OptionsMenuUI optionsMenuUI;
+
     private void Awake()
     {
         RegisterButtonListeners();
+    }
+
+    private void Start()
+    {
+        ShowElements();
     }
 
     private void OnDestroy()
@@ -62,9 +73,13 @@ public class MainMenuController : MonoBehaviour
     {
         Debug.Log("Load Game ainda nao implementado.");
     }
+
     public void OpenOptions()
     {
-        Debug.Log("Options ainda nao implementado.");
+        HideElements();
+
+        if (optionsMenuUI != null)
+            optionsMenuUI.Show();
     }
 
     public void ExitGame()
@@ -74,5 +89,17 @@ public class MainMenuController : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    public void ShowElements()
+    {
+        if (elements != null)
+            elements.SetActive(true);
+    }
+
+    public void HideElements()
+    {
+        if (elements != null)
+            elements.SetActive(false);
     }
 }
