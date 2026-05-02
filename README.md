@@ -1,6 +1,6 @@
-# Displate (Working name)
+# Pawns&Plates (Working name)
 
-Displate (Working name) is a **tactical restaurant management game** in development with Unity, centered around **dispatching staff to time-sensitive tasks** across a growing restaurant.
+Pawns&Plates (Working name) is a **tactical restaurant management game** in development with Unity, centered around **dispatching staff to time-sensitive tasks** across a growing restaurant.
 
 Instead of relying on passive “preparation timers” as the main interaction, the game turns restaurant flow into an active decision-making system: tasks appear on the map, the player evaluates requirements, assigns the best available employees, manages stamina and recovery, and expands the restaurant while keeping the operation under control.
 
