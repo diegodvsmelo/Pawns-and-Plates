@@ -1,24 +1,21 @@
 using UnityEngine;
-using TMPro;
 using System;
 
 public class ResourceManager : MonoBehaviour
 {
     public static ResourceManager Instance { get; private set; }
 
-    [Header("UI References")]
-    public TextMeshProUGUI moneyText;
-    public TextMeshProUGUI reputationText;
-
     [Header("Starting Values")]
-    public int currentMoney = 100;
-    public int currentReputation = 50;
+    [SerializeField] private int currentMoney = 100;
+    [SerializeField] private int currentReputation = 50;
 
-    // OBSERVERS
     public event Action<int> OnMoneyChanged;
     public event Action<int> OnReputationChanged;
     public event Action OnMoneyInsufficient;
     public event Action OnReputationReachedZero;
+
+    public int CurrentMoney => currentMoney;
+    public int CurrentReputation => currentReputation;
 
     private void Awake()
     {
@@ -39,7 +36,6 @@ public class ResourceManager : MonoBehaviour
     public void ModifyMoney(int amount)
     {
         currentMoney += amount;
-
         OnMoneyChanged?.Invoke(currentMoney);
     }
 
@@ -65,9 +61,22 @@ public class ResourceManager : MonoBehaviour
         OnReputationChanged?.Invoke(currentReputation);
 
         if (currentReputation <= 0)
-        {
             OnReputationReachedZero?.Invoke();
-        }
+    }
+
+    public void SetMoney(int value)
+    {
+        currentMoney = Mathf.Max(0, value);
+        OnMoneyChanged?.Invoke(currentMoney);
+    }
+
+    public void SetReputation(int value)
+    {
+        currentReputation = Mathf.Max(0, value);
+        OnReputationChanged?.Invoke(currentReputation);
+
+        if (currentReputation <= 0)
+            OnReputationReachedZero?.Invoke();
     }
 
     private void NotifyAll()
