@@ -16,9 +16,9 @@ public class EmployeeCardUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI traitText;
 
-    [Header("Buff / Debuff Slots")]
-    [SerializeField] private Image buffIconSlot;
-    [SerializeField] private Image debuffIconSlot;
+    [Header("Status Slots")]
+    [SerializeField] private Image statusIconSlotA;
+    [SerializeField] private Image statusIconSlotB;
 
     [Header("Bars")]
     [SerializeField] private Slider staminaSlider;
@@ -57,7 +57,6 @@ public class EmployeeCardUI : MonoBehaviour
         if (traitText != null)
         {
             bool hasTrait = employeeData.HasTrait();
-
             traitText.gameObject.SetActive(hasTrait);
             traitText.text = hasTrait ? employeeData.traitName : "";
         }
@@ -65,8 +64,8 @@ public class EmployeeCardUI : MonoBehaviour
         if (levelUpIcon != null)
             levelUpIcon.gameObject.SetActive(employeeData.HasUnspentSkillPoints());
 
-        UpdateIconSlot(buffIconSlot, employeeData.buffIcon);
-        UpdateIconSlot(debuffIconSlot, employeeData.debuffIcon);
+        UpdateStatusIcon(statusIconSlotA, employeeData.statusIconA);
+        UpdateStatusIcon(statusIconSlotB, employeeData.statusIconB);
 
         if (staminaSlider != null)
             staminaSlider.value = employeeData.GetStaminaPercent();
@@ -75,7 +74,7 @@ public class EmployeeCardUI : MonoBehaviour
             xpSlider.value = employeeData.GetXpPercent();
     }
 
-    private void UpdateIconSlot(Image slot, Sprite icon)
+    private void UpdateStatusIcon(Image slot, Sprite icon)
     {
         if (slot == null)
             return;

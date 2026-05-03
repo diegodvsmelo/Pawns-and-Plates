@@ -11,32 +11,57 @@ public class EmployeeData : ScriptableObject
     [Header("Visual Settings")]
     public Color cardColor = Color.white;
 
-    [Header("Skills (0-100)")]
-    [Range(0, 100)] public int cookingSkill;
-    [Range(0, 100)] public int serviceSkill;
-    [Range(0, 100)] public int operationalSkill;
+    [Header("Skills (0-10)")]
+    [Range(0, 10)] public int cookingSkill;
+    [Range(0, 10)] public int serviceSkill;
+    [Range(0, 10)] public int operationalSkill;
 
     [Header("Physical Stats")]
-    [Range(0, 100)] public int agility;
-    [Range(0, 100)] public int maxStamina = 100;
-    [Range(0, 100)] public int currentStamina = 100;
+    [Range(0, 10)] public int agility;
+    [Min(1)] public int maxStamina = 100;
+    [Min(0)] public int currentStamina = 100;
 
     [Header("Progression")]
-    public int currentLevel = 1;
-    public int currentXP = 0;
-    public int skillPoints = 0;
+    [Min(1)] public int currentLevel = 1;
+    [Min(0)] public int currentXP = 0;
+    [Min(0)] public int skillPoints = 0;
 
     [Header("Trait")]
     public bool hasTrait;
     public string traitName;
-    public Sprite traitIcon;
 
-    [Header("Buff / Debuff UI")]
-    public Sprite buffIcon;
-    public Sprite debuffIcon;
+    [Header("Status Icons")]
+    [Tooltip("Pode ser buff, debuff ou qualquer outro status visual.")]
+    public Sprite statusIconA;
+
+    [Tooltip("Pode ser buff, debuff ou qualquer outro status visual.")]
+    public Sprite statusIconB;
 
     [Header("Contract Info")]
-    public int baseSalary = 1;
+    [Min(0)] public int baseSalary = 1;
+
+    private void OnValidate()
+    {
+        if (maxStamina < 1)
+            maxStamina = 1;
+
+        currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
+
+        if (currentLevel < 1)
+            currentLevel = 1;
+
+        if (currentXP < 0)
+            currentXP = 0;
+
+        if (skillPoints < 0)
+            skillPoints = 0;
+
+        if (baseSalary < 0)
+            baseSalary = 0;
+
+        if (!hasTrait)
+            traitName = "";
+    }
 
     public bool HasUnspentSkillPoints()
     {
@@ -46,6 +71,16 @@ public class EmployeeData : ScriptableObject
     public bool HasTrait()
     {
         return hasTrait && !string.IsNullOrWhiteSpace(traitName);
+    }
+
+    public bool HasStatusA()
+    {
+        return statusIconA != null;
+    }
+
+    public bool HasStatusB()
+    {
+        return statusIconB != null;
     }
 
     public int GetDailyCost()
