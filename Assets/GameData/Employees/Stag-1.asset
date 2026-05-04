@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: Stag-1
   m_EditorClassIdentifier: Assembly-CSharp::EmployeeData
   employeeName: Stag
-  description: 
   profilePicture: {fileID: 0}
-  cardColor: {r: 0.7882353, g: 0.66408986, b: 0.16470589, a: 1}
-  cookingSkill: 20
-  serviceSkill: 40
-  operationalSkill: 50
-  agility: 60
+  cookingSkill: 10
+  serviceSkill: 10
+  operationalSkill: 10
+  agility: 10
   maxStamina: 100
+  currentStamina: 100
   currentLevel: 1
   currentXP: 99
   skillPoints: 0
+  hasTrait: 0
+  traitName: 
+  statusIconA: {fileID: 0}
+  statusIconB: {fileID: 0}
+  baseSalary: 1

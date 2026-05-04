@@ -5,11 +5,7 @@ public class EmployeeData : ScriptableObject
 {
     [Header("Identity")]
     public string employeeName;
-    [TextArea] public string description;
     public Sprite profilePicture;
-
-    [Header("Visual Settings")]
-    public Color cardColor = Color.white;
 
     [Header("Skills (0-10)")]
     [Range(0, 10)] public int cookingSkill;

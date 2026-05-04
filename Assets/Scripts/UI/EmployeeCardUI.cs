@@ -4,9 +4,6 @@ using TMPro;
 
 public class EmployeeCardUI : MonoBehaviour
 {
-    [Header("Background")]
-    [SerializeField] private Image cardBackground;
-
     [Header("Main Info")]
     [SerializeField] private Image profileImage;
     [SerializeField] private Image levelUpIcon;
@@ -41,9 +38,6 @@ public class EmployeeCardUI : MonoBehaviour
         }
 
         gameObject.SetActive(true);
-
-        if (cardBackground != null)
-            cardBackground.color = employeeData.cardColor;
 
         if (profileImage != null)
             profileImage.sprite = employeeData.profilePicture;

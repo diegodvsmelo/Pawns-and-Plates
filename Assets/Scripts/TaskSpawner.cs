@@ -7,23 +7,25 @@ public class TaskSpawner : MonoBehaviour
 {
     public static TaskSpawner Instance { get; private set; }
 
-    [Header("Settings")]
-    public GameObject pinPrefab;
-    public RectTransform spawnArea;
+    [Header("Prefab")]
+    [SerializeField] private GameObject pinPrefab;
+
+    [Header("Task Generator Structures")]
+    [SerializeField] private List<TaskGeneratorStructure> taskGenerators = new();
+
+    [Header("Tasks")]
+    [SerializeField] private List<TaskData> possibleTasks = new();
 
     [Header("Timers")]
-    public float minSpawnTime = 2f;
-    public float maxSpawnTime = 5f;
-
-    [Header("Data Source")]
-    public List<TaskData> possibleTasks;
+    [SerializeField] private float minSpawnTime = 2f;
+    [SerializeField] private float maxSpawnTime = 5f;
 
     public event Action OnSpawningStarted;
     public event Action OnSpawningStopped;
     public event Action<TaskPin> OnTaskSpawned;
     public event Action<TaskPin> OnTaskSelected;
 
-    private bool isSpawningActive = false;
+    private bool isSpawningActive;
     private GameManager gameManager;
     private Coroutine spawnCoroutine;
 
@@ -80,55 +82,130 @@ public class TaskSpawner : MonoBehaviour
 
             while (counter < waitTime)
             {
-                if (gameManager != null && !gameManager.isGamePaused)
-                {
+                if (gameManager == null || !gameManager.isGamePaused)
                     counter += Time.deltaTime;
-                }
 
                 yield return null;
             }
 
-            if (isSpawningActive && gameManager != null && !gameManager.isGamePaused)
-            {
-                SpawnTask();
-            }
+            if (isSpawningActive && (gameManager == null || !gameManager.isGamePaused))
+                SpawnRandomTaskOnStructure();
         }
     }
 
-    private void SpawnTask()
+    private void SpawnRandomTaskOnStructure()
     {
-        if (possibleTasks == null || possibleTasks.Count == 0)
-            return;
-
-        if (pinPrefab == null || spawnArea == null)
+        if (pinPrefab == null)
         {
-            Debug.LogWarning("TaskSpawner está sem pinPrefab ou spawnArea.");
+            Debug.LogWarning("TaskSpawner está sem pinPrefab.");
             return;
         }
 
-        TaskData randomTask = possibleTasks[UnityEngine.Random.Range(0, possibleTasks.Count)];
-        GameObject newPin = Instantiate(pinPrefab, spawnArea);
+        if (possibleTasks == null || possibleTasks.Count == 0)
+        {
+            Debug.LogWarning("TaskSpawner não possui possibleTasks.");
+            return;
+        }
 
-        float width = spawnArea.rect.width;
-        float height = spawnArea.rect.height;
+        if (taskGenerators == null || taskGenerators.Count == 0)
+        {
+            Debug.LogWarning("TaskSpawner não possui estruturas geradoras.");
+            return;
+        }
 
-        float randomX = UnityEngine.Random.Range(-width / 2f, width / 2f);
-        float randomY = UnityEngine.Random.Range(-height / 2f, height / 2f);
+        List<TaskSpawnOption> validOptions = GetValidSpawnOptions();
+
+        if (validOptions.Count == 0)
+        {
+            Debug.Log("Nenhuma estrutura disponível para spawnar task no momento.");
+            return;
+        }
+
+        TaskSpawnOption chosenOption = validOptions[UnityEngine.Random.Range(0, validOptions.Count)];
+
+        SpawnTaskOnStructure(chosenOption.taskData, chosenOption.structure);
+    }
+
+    private List<TaskSpawnOption> GetValidSpawnOptions()
+    {
+        List<TaskSpawnOption> validOptions = new();
+
+        foreach (TaskData task in possibleTasks)
+        {
+            if (task == null)
+                continue;
+
+            foreach (TaskGeneratorStructure structure in taskGenerators)
+            {
+                if (structure == null)
+                    continue;
+
+                if (structure.CanReceiveTask(task.taskType))
+                {
+                    validOptions.Add(new TaskSpawnOption(task, structure));
+                }
+            }
+        }
+
+        return validOptions;
+    }
+
+    private TaskPin SpawnTaskOnStructure(TaskData taskData, TaskGeneratorStructure structure)
+    {
+        if (taskData == null || structure == null)
+            return null;
+
+        if (!structure.CanReceiveTask(taskData.taskType))
+            return null;
+
+        if (structure.PinContainer == null)
+        {
+            Debug.LogWarning($"Estrutura {structure.structureName} está sem PinContainer.");
+            return null;
+        }
+
+        GameObject newPin = Instantiate(pinPrefab, structure.PinContainer);
 
         RectTransform pinRect = newPin.GetComponent<RectTransform>();
 
         if (pinRect != null)
         {
-            pinRect.anchoredPosition = new Vector2(randomX * 0.9f, randomY * 0.9f);
+            pinRect.anchoredPosition = Vector2.zero;
+            pinRect.localRotation = Quaternion.identity;
+            pinRect.localScale = Vector3.one;
+        }
+        else
+        {
+            newPin.transform.localPosition = Vector3.zero;
+            newPin.transform.localRotation = Quaternion.identity;
+            newPin.transform.localScale = Vector3.one;
         }
 
         TaskPin pinScript = newPin.GetComponent<TaskPin>();
 
-        if (pinScript != null)
+        if (pinScript == null)
         {
-            pinScript.Setup(randomTask, OnTaskPinClicked);
-            OnTaskSpawned?.Invoke(pinScript);
+            Debug.LogWarning("Prefab de TaskPin não possui componente TaskPin.");
+            Destroy(newPin);
+            return null;
         }
+
+        pinScript.Setup(taskData, OnTaskPinClicked);
+
+        structure.RegisterPin(pinScript);
+
+        TaskPinWorldBinding binding = newPin.GetComponent<TaskPinWorldBinding>();
+
+        if (binding == null)
+            binding = newPin.AddComponent<TaskPinWorldBinding>();
+
+        binding.Setup(structure, pinScript);
+
+        OnTaskSpawned?.Invoke(pinScript);
+
+        Debug.Log($"Spawnou task '{taskData.taskName}' em '{structure.structureName}'.");
+
+        return pinScript;
     }
 
     private void OnTaskPinClicked(TaskPin taskPin)
@@ -136,15 +213,22 @@ public class TaskSpawner : MonoBehaviour
         if (taskPin == null || taskPin.data == null)
             return;
 
-        Debug.Log($"Jogador clicou na missão: {taskPin.data.taskName}");
+        Debug.Log($"Clicou na task: {taskPin.data.taskName}. Concluindo task para teste.");
 
         OnTaskSelected?.Invoke(taskPin);
 
-        StopSpawning();
+        taskPin.CompleteAndDestroy();
+    }
 
-        if (gameManager != null)
+    private struct TaskSpawnOption
+    {
+        public TaskData taskData;
+        public TaskGeneratorStructure structure;
+
+        public TaskSpawnOption(TaskData taskData, TaskGeneratorStructure structure)
         {
-            gameManager.OpenMissionWindow(taskPin);
+            this.taskData = taskData;
+            this.structure = structure;
         }
     }
 }

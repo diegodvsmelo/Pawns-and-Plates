@@ -1,109 +1,235 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System;
 
 public class TaskPin : MonoBehaviour
 {
+    [Header("Data")]
     public TaskData data;
 
-    [Header("UI")]
-    public Slider timerSlider;
+    public TaskInstance Instance { get; private set; }
 
-    public event Action<TaskPin> OnExpired;
-    public event Action<TaskPin> OnClicked;
-    public event Action<TaskPin, float> OnTimerChanged;
+    [Header("UI References")]
+    [SerializeField] private Button button;
+    [SerializeField] private Image iconImage;
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private TextMeshProUGUI timerText;
+    [SerializeField] private TextMeshProUGUI stateText;
 
-    private Action<TaskPin> onClickCallback;
+    [Header("Visual States")]
+    [SerializeField] private Color availableColor = Color.white;
+    [SerializeField] private Color inProgressColor = Color.yellow;
+    [SerializeField] private Color readyToCollectColor = Color.green;
+    [SerializeField] private Color expiredColor = Color.gray;
 
-    private float timeRemaining;
-    private bool isSelected = false;
+    private Action<TaskPin> onClick;
+    private bool isPaused;
 
-    private ResourceManager resourceManager;
-    private GameManager gameManager;
+    public TaskState CurrentState
+    {
+        get
+        {
+            if (Instance == null)
+                return TaskState.Available;
 
-    public void Setup(TaskData taskData, Action<TaskPin> callback)
+            return Instance.state;
+        }
+    }
+
+    public void Setup(TaskData taskData, Action<TaskPin> clickCallback)
     {
         data = taskData;
-        onClickCallback = callback;
+        Instance = new TaskInstance(taskData);
+        onClick = clickCallback;
 
-        timeRemaining = taskData.timeLimit;
-        isSelected = false;
+        if (button == null)
+            button = GetComponent<Button>();
 
-        if (timerSlider != null)
+        if (button != null)
         {
-            timerSlider.maxValue = taskData.timeLimit;
-            timerSlider.value = timeRemaining;
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(HandleClick);
         }
 
-        resourceManager = ResourceManager.Instance;
-        gameManager = GameManager.Instance;
+        ApplyTaskVisualData();
+        RefreshVisualState();
     }
 
     private void Update()
     {
-        if (gameManager != null && gameManager.isGamePaused)
+        if (Instance == null || data == null)
             return;
 
-        if (isSelected)
+        if (isPaused)
             return;
 
-        if (timeRemaining > 0)
+        if (GameManager.Instance != null && GameManager.Instance.isGamePaused)
+            return;
+
+        if (Instance.state == TaskState.Available)
         {
-            timeRemaining -= Time.deltaTime;
+            UpdateAvailableTimer();
+        }
+        else if (Instance.state == TaskState.InProgress)
+        {
+            UpdateExecutionTimer();
+        }
 
-            if (timeRemaining < 0)
-                timeRemaining = 0;
+        UpdateTimerText();
+    }
 
-            if (timerSlider != null)
-                timerSlider.value = timeRemaining;
+    private void UpdateAvailableTimer()
+    {
+        if (!Instance.CanExpire())
+            return;
 
-            OnTimerChanged?.Invoke(this, timeRemaining);
+        Instance.remainingExpirationTime -= Time.deltaTime;
 
-            if (timeRemaining <= 0)
-            {
-                HandleExpiration();
-            }
+        if (Instance.remainingExpirationTime <= 0f)
+        {
+            Instance.remainingExpirationTime = 0f;
+            SetState(TaskState.Expired);
         }
     }
 
-    private void HandleExpiration()
+    private void UpdateExecutionTimer()
     {
-        Debug.Log($"Tarefa {data.taskName} expirou! Cliente foi embora.");
+        Instance.remainingExecutionTime -= Time.deltaTime;
 
-        OnExpired?.Invoke(this);
-
-        if (resourceManager != null)
+        if (Instance.remainingExecutionTime <= 0f)
         {
-            resourceManager.ModifyReputation(-data.reputationPenalty);
+            Instance.remainingExecutionTime = 0f;
+            SetState(TaskState.ReadyToCollect);
         }
-
-        Destroy(gameObject);
     }
 
-    public void OnClick()
+    private void HandleClick()
     {
-        if (isSelected)
+        if (Instance == null)
             return;
 
-        isSelected = true;
+        if (Instance.state == TaskState.Expired)
+            return;
 
-        OnClicked?.Invoke(this);
-
-        onClickCallback?.Invoke(this);
+        onClick?.Invoke(this);
     }
 
-    public void ResumeTimer()
+    public void SetState(TaskState newState)
     {
-        isSelected = false;
+        if (Instance == null)
+            return;
+
+        Instance.state = newState;
+        RefreshVisualState();
+    }
+
+    public void StartExecution()
+    {
+        if (Instance == null || data == null)
+            return;
+
+        Instance.remainingExecutionTime = data.executionTime;
+        SetState(TaskState.InProgress);
+    }
+
+    public void MarkReadyToCollect()
+    {
+        SetState(TaskState.ReadyToCollect);
     }
 
     public void CompleteAndDestroy()
     {
+        if (Instance != null)
+            Instance.state = TaskState.Completed;
+
         Destroy(gameObject);
     }
 
-    public float GetTimeRemaining()
+    public void PauseTimer()
     {
-        return timeRemaining;
+        isPaused = true;
+    }
+
+    public void ResumeTimer()
+    {
+        isPaused = false;
+    }
+
+    private void ApplyTaskVisualData()
+    {
+        if (data == null)
+            return;
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = data.taskIcon;
+            iconImage.gameObject.SetActive(data.taskIcon != null);
+        }
+
+        if (backgroundImage != null)
+            backgroundImage.color = data.taskColor;
+    }
+
+    private void RefreshVisualState()
+    {
+        if (Instance == null)
+            return;
+
+        if (backgroundImage != null)
+        {
+            if (Instance.state == TaskState.Available)
+                backgroundImage.color = availableColor;
+            else if (Instance.state == TaskState.InProgress)
+                backgroundImage.color = inProgressColor;
+            else if (Instance.state == TaskState.ReadyToCollect)
+                backgroundImage.color = readyToCollectColor;
+            else if (Instance.state == TaskState.Expired)
+                backgroundImage.color = expiredColor;
+        }
+
+        if (stateText != null)
+        {
+            if (Instance.state == TaskState.Available)
+                stateText.text = "!";
+            else if (Instance.state == TaskState.InProgress)
+                stateText.text = "...";
+            else if (Instance.state == TaskState.ReadyToCollect)
+                stateText.text = "✓";
+            else if (Instance.state == TaskState.Expired)
+                stateText.text = "X";
+            else
+                stateText.text = "";
+        }
+    }
+
+    private void UpdateTimerText()
+    {
+        if (timerText == null || Instance == null)
+            return;
+
+        if (Instance.state == TaskState.Available)
+        {
+            if (Instance.CanExpire())
+                timerText.text = Mathf.CeilToInt(Instance.remainingExpirationTime).ToString();
+            else
+                timerText.text = "";
+        }
+        else if (Instance.state == TaskState.InProgress)
+        {
+            timerText.text = Mathf.CeilToInt(Instance.remainingExecutionTime).ToString();
+        }
+        else if (Instance.state == TaskState.ReadyToCollect)
+        {
+            timerText.text = "Pronto";
+        }
+        else if (Instance.state == TaskState.Expired)
+        {
+            timerText.text = "Expirou";
+        }
+        else
+        {
+            timerText.text = "";
+        }
     }
 }

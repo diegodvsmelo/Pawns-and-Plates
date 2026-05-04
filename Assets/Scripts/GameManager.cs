@@ -355,22 +355,34 @@ public class GameManager : MonoBehaviour
 
     public float CalculateSquadChance(TaskData task, List<EmployeeData> squad)
     {
-        float totalSquadScore = 0;
-        float totalWeights = 0;
+        if (task == null || squad == null || squad.Count == 0)
+            return 0f;
 
-        foreach (var req in task.requirements)
+        if (task.requirements == null || task.requirements.Count == 0)
+            return 0f;
+
+        float totalSquadScore = 0f;
+        float totalWeights = 0f;
+
+        foreach (TaskRequirement req in task.requirements)
         {
-            float attrSum = 0;
+            if (req == null)
+                continue;
 
-            foreach (var mem in squad)
+            float attrSum = 0f;
+
+            foreach (EmployeeData mem in squad)
             {
-                if (req.category == TaskCategory.Cooking)
+                if (mem == null)
+                    continue;
+
+                if (req.skillType == EmployeeSkillType.Cooking)
                     attrSum += mem.cookingSkill;
-                else if (req.category == TaskCategory.Service)
+                else if (req.skillType == EmployeeSkillType.Service)
                     attrSum += mem.serviceSkill;
-                else if (req.category == TaskCategory.Operational)
+                else if (req.skillType == EmployeeSkillType.Operational)
                     attrSum += mem.operationalSkill;
-                else if (req.category == TaskCategory.Agility)
+                else if (req.skillType == EmployeeSkillType.Agility)
                     attrSum += mem.agility;
             }
 
@@ -378,10 +390,14 @@ public class GameManager : MonoBehaviour
             totalWeights += req.weight;
         }
 
-        if (totalWeights == 0)
-            return 0;
+        if (totalWeights <= 0f)
+            return 0f;
 
         float finalScore = totalSquadScore / totalWeights;
+
+        if (task.difficultyPoints <= 0f)
+            return 100f;
+
         return Mathf.Clamp((finalScore / task.difficultyPoints) * 100f, 0f, 100f);
     }
 

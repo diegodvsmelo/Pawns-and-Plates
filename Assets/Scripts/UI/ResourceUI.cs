@@ -11,5 +11,14 @@ public class ResourceUI : MonoBehaviour
     {
         ResourceManager.Instance.ModifyReputation(10);
     }
+    public void TestTakeMoney()
+    {
+        ResourceManager.Instance.ModifyMoney(-10);
+    }
+    public void TestTakeReputation()
+    {
+        ResourceManager.Instance.ModifyReputation(-10);
+    }
 }
+
     

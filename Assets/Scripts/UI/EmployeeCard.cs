@@ -65,12 +65,6 @@ public class EmployeeCard : MonoBehaviour, IPointerClickHandler
     {
         data = newData;
 
-        if (backgroundImage == null)
-            backgroundImage = GetComponent<Image>();
-
-        if (backgroundImage != null)
-            backgroundImage.color = newData.cardColor;
-
         currentStamina = newData.maxStamina;
 
         UpdateStaminaUI();
