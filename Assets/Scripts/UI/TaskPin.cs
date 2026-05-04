@@ -7,21 +7,29 @@ public class TaskPin : MonoBehaviour
 {
     [Header("Data")]
     public TaskData data;
-
     public TaskInstance Instance { get; private set; }
 
     [Header("UI References")]
     [SerializeField] private Button button;
     [SerializeField] private Image iconImage;
     [SerializeField] private Image backgroundImage;
+    [SerializeField] private Slider timerSlider;
+    [SerializeField] private Image timerFillImage;
+    [SerializeField] private Image timerBackgroundImage;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private TextMeshProUGUI stateText;
 
     [Header("Visual States")]
-    [SerializeField] private Color availableColor = Color.white;
-    [SerializeField] private Color inProgressColor = Color.yellow;
-    [SerializeField] private Color readyToCollectColor = Color.green;
-    [SerializeField] private Color expiredColor = Color.gray;
+    [SerializeField] private Color availableColor;
+    [SerializeField] private Color inProgressColor;
+    [SerializeField] private Color readyToCollectColor;
+    [SerializeField] private Color expiredColor;
+
+    [Header("Timer Colors")]
+    [SerializeField] private Color availableTimerColor;
+    [SerializeField] private Color executionTimerColor;
+    [SerializeField] private Color readyTimerColor;
+    [SerializeField] private Color expiredTimerColor;
 
     private Action<TaskPin> onClick;
     private bool isPaused;
@@ -52,8 +60,10 @@ public class TaskPin : MonoBehaviour
             button.onClick.AddListener(HandleClick);
         }
 
+        SetupSlider();
         ApplyTaskVisualData();
         RefreshVisualState();
+        UpdateTimerVisual();
     }
 
     private void Update()
@@ -76,7 +86,18 @@ public class TaskPin : MonoBehaviour
             UpdateExecutionTimer();
         }
 
-        UpdateTimerText();
+        UpdateTimerVisual();
+    }
+
+    private void SetupSlider()
+    {
+        if (timerSlider == null)
+            return;
+
+        timerSlider.minValue = 0f;
+        timerSlider.maxValue = 1f;
+        timerSlider.value = 1f;
+        timerSlider.interactable = false;
     }
 
     private void UpdateAvailableTimer()
@@ -109,10 +130,21 @@ public class TaskPin : MonoBehaviour
         if (Instance == null)
             return;
 
-        if (Instance.state == TaskState.Expired)
-            return;
-
         onClick?.Invoke(this);
+    }
+
+    public void StartExecution()
+    {
+        if (Instance == null || data == null)
+        {
+            Debug.LogWarning("Não foi possível iniciar execução: Instance ou Data null.");
+            return;
+        }
+
+        Debug.Log($"StartExecution chamado para: {data.taskName}");
+
+        Instance.remainingExecutionTime = data.executionTime;
+        SetState(TaskState.InProgress);
     }
 
     public void SetState(TaskState newState)
@@ -121,21 +153,9 @@ public class TaskPin : MonoBehaviour
             return;
 
         Instance.state = newState;
+
         RefreshVisualState();
-    }
-
-    public void StartExecution()
-    {
-        if (Instance == null || data == null)
-            return;
-
-        Instance.remainingExecutionTime = data.executionTime;
-        SetState(TaskState.InProgress);
-    }
-
-    public void MarkReadyToCollect()
-    {
-        SetState(TaskState.ReadyToCollect);
+        UpdateTimerVisual();
     }
 
     public void CompleteAndDestroy()
@@ -166,11 +186,17 @@ public class TaskPin : MonoBehaviour
             iconImage.sprite = data.taskIcon;
             iconImage.gameObject.SetActive(data.taskIcon != null);
         }
-
-        if (backgroundImage != null)
-            backgroundImage.color = data.taskColor;
     }
 
+    private void UpdateFillVisibility()
+    {
+        if (timerFillImage == null || Instance == null)
+            return;
+
+        Color color = timerFillImage.color;
+        color.a = Instance.state == TaskState.ReadyToCollect ? 0f : 1f;
+        timerFillImage.color = color;
+    }
     private void RefreshVisualState()
     {
         if (Instance == null)
@@ -188,6 +214,18 @@ public class TaskPin : MonoBehaviour
                 backgroundImage.color = expiredColor;
         }
 
+        if (timerBackgroundImage != null)
+        {
+            if (Instance.state == TaskState.Available)
+                timerBackgroundImage.color = availableTimerColor;
+            else if (Instance.state == TaskState.InProgress)
+                timerBackgroundImage.color = executionTimerColor;
+            else if (Instance.state == TaskState.ReadyToCollect)
+                timerBackgroundImage.color = readyTimerColor;
+            else if (Instance.state == TaskState.Expired)
+                timerBackgroundImage.color = expiredTimerColor;
+        }
+
         if (stateText != null)
         {
             if (Instance.state == TaskState.Available)
@@ -201,35 +239,76 @@ public class TaskPin : MonoBehaviour
             else
                 stateText.text = "";
         }
+        UpdateFillVisibility();
     }
 
-    private void UpdateTimerText()
+    private void UpdateTimerVisual()
     {
-        if (timerText == null || Instance == null)
+        if (Instance == null || data == null)
             return;
 
+        if (timerSlider != null)
+        {
+            timerSlider.value = GetTimerNormalizedValue();
+        }
+
+        if (timerText != null)
+        {
+            timerText.text = GetTimerText();
+        }
+    }
+
+    private float GetTimerNormalizedValue()
+    {
         if (Instance.state == TaskState.Available)
         {
-            if (Instance.CanExpire())
-                timerText.text = Mathf.CeilToInt(Instance.remainingExpirationTime).ToString();
-            else
-                timerText.text = "";
+            if (!Instance.CanExpire())
+                return 1f;
+
+            if (data.expirationTime <= 0f)
+                return 1f;
+
+            return Mathf.Clamp01(Instance.remainingExpirationTime / data.expirationTime);
         }
-        else if (Instance.state == TaskState.InProgress)
+
+        if (Instance.state == TaskState.InProgress)
         {
-            timerText.text = Mathf.CeilToInt(Instance.remainingExecutionTime).ToString();
+            if (data.executionTime <= 0f)
+                return 1f;
+
+            return Mathf.Clamp01(Instance.remainingExecutionTime / data.executionTime);
         }
-        else if (Instance.state == TaskState.ReadyToCollect)
+
+        if (Instance.state == TaskState.ReadyToCollect)
+            return 1f;
+
+        if (Instance.state == TaskState.Expired)
+            return 0f;
+
+        return 0f;
+    }
+
+    private string GetTimerText()
+    {
+        if (Instance.state == TaskState.Available)
         {
-            timerText.text = "Pronto";
+            if (!Instance.CanExpire())
+                return "";
+
+            return Mathf.CeilToInt(Instance.remainingExpirationTime).ToString();
         }
-        else if (Instance.state == TaskState.Expired)
+
+        if (Instance.state == TaskState.InProgress)
         {
-            timerText.text = "Expirou";
+            return Mathf.CeilToInt(Instance.remainingExecutionTime).ToString();
         }
-        else
-        {
-            timerText.text = "";
-        }
+
+        if (Instance.state == TaskState.ReadyToCollect)
+            return "Pronto";
+
+        if (Instance.state == TaskState.Expired)
+            return "Expirou";
+
+        return "";
     }
 }

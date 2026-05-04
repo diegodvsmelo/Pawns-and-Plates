@@ -210,16 +210,88 @@ public class TaskSpawner : MonoBehaviour
 
     private void OnTaskPinClicked(TaskPin taskPin)
     {
-        if (taskPin == null || taskPin.data == null)
+        if (taskPin == null || taskPin.data == null || taskPin.Instance == null)
             return;
 
-        Debug.Log($"Clicou na task: {taskPin.data.taskName}. Concluindo task para teste.");
+        if (taskPin.CurrentState == TaskState.Available)
+        {
+            Debug.Log($"Clicou na task: {taskPin.data.taskName}. Iniciando execução para teste.");
+            taskPin.StartExecution();
+            return;
+        }
 
-        OnTaskSelected?.Invoke(taskPin);
+        if (taskPin.CurrentState == TaskState.InProgress)
+        {
+            Debug.Log($"Task em andamento: {taskPin.data.taskName}. Aguarde terminar.");
+            return;
+        }
 
-        taskPin.CompleteAndDestroy();
+        if (taskPin.CurrentState == TaskState.ReadyToCollect)
+        {
+            Debug.Log($"Resultado coletado da task: {taskPin.data.taskName}. Aplicando sucesso.");
+
+            ApplySuccessReward(taskPin.data);
+            taskPin.CompleteAndDestroy();
+            return;
+        }
+
+        if (taskPin.CurrentState == TaskState.Expired)
+        {
+            Debug.Log($"Task expirada coletada: {taskPin.data.taskName}. Aplicando penalidade.");
+
+            ApplyFailurePenalty(taskPin.data);
+            taskPin.CompleteAndDestroy();
+            return;
+        }
     }
 
+    private void ApplySuccessReward(TaskData taskData)
+    {
+        if (taskData == null)
+            return;
+
+        ResourceManager resourceManager = ResourceManager.Instance;
+
+        if (resourceManager == null)
+        {
+            Debug.LogWarning("Não foi possível aplicar recompensa: ResourceManager não encontrado.");
+            return;
+        }
+
+        int moneyReward = taskData.GetTotalMoneyReward(false);
+        int reputationReward = taskData.GetTotalReputationReward(false);
+
+        if (moneyReward != 0)
+            resourceManager.ModifyMoney(moneyReward);
+
+        if (reputationReward != 0)
+            resourceManager.ModifyReputation(reputationReward);
+
+        if (DayCycleManager.Instance != null && moneyReward > 0)
+            DayCycleManager.Instance.AddDailyEarnings(moneyReward);
+
+        Debug.Log($"Recompensa aplicada: +${moneyReward}, +{reputationReward} reputação.");
+    }
+
+    private void ApplyFailurePenalty(TaskData taskData)
+    {
+        if (taskData == null)
+            return;
+
+        ResourceManager resourceManager = ResourceManager.Instance;
+
+        if (resourceManager == null)
+        {
+            Debug.LogWarning("Não foi possível aplicar penalidade: ResourceManager não encontrado.");
+            return;
+        }
+
+        if (taskData.reputationPenalty != 0)
+            resourceManager.ModifyReputation(-taskData.reputationPenalty);
+
+        Debug.Log($"Penalidade aplicada: -{taskData.reputationPenalty} reputação.");
+    }
+    
     private struct TaskSpawnOption
     {
         public TaskData taskData;
