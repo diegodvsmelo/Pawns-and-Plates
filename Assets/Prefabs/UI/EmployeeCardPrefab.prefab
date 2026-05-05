@@ -1346,6 +1346,8 @@ GameObject:
   - component: {fileID: 8588962543565453297}
   - component: {fileID: 1724307198705110690}
   - component: {fileID: 8091728973060723412}
+  - component: {fileID: 5393173364267306994}
+  - component: {fileID: 975284813533354347}
   m_Layer: 5
   m_Name: EmployeeCardPrefab
   m_TagString: Untagged
@@ -1452,7 +1454,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e890888cd3f5c4641b3e0eb53b9cdc1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EmployeeCardUI
-  cardBackground: {fileID: 8588962543565453297}
   profileImage: {fileID: 2049573224090963818}
   levelUpIcon: {fileID: 920289614904428852}
   nameText: {fileID: 6729119123716205889}
@@ -1462,3 +1463,28 @@ MonoBehaviour:
   statusIconSlotB: {fileID: 330901664810145777}
   staminaSlider: {fileID: 8971909591672491711}
   xpSlider: {fileID: 807142250593007022}
+--- !u!225 &5393173364267306994
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8787868045459183668}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &975284813533354347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8787868045459183668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ee9f3a392d00ac4cba9e446a991beed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EmployeeCardDraggable
+  dragLayer: {fileID: 0}

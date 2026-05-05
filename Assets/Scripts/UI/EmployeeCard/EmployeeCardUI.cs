@@ -21,7 +21,15 @@ public class EmployeeCardUI : MonoBehaviour
     [SerializeField] private Slider staminaSlider;
     [SerializeField] private Slider xpSlider;
 
+    [Header("Expanded Stats - Optional")]
+    [SerializeField] private AttributeSquaresUI cookingSquares;
+    [SerializeField] private AttributeSquaresUI serviceSquares;
+    [SerializeField] private AttributeSquaresUI operationalSquares;
+    [SerializeField] private AttributeSquaresUI agilitySquares;
+
     private EmployeeData employeeData;
+
+    public EmployeeData Data => employeeData;
 
     public void Setup(EmployeeData data)
     {
@@ -66,6 +74,23 @@ public class EmployeeCardUI : MonoBehaviour
 
         if (xpSlider != null)
             xpSlider.value = employeeData.GetXpPercent();
+
+        UpdateAttributeSquares();
+    }
+
+    private void UpdateAttributeSquares()
+    {
+        if (cookingSquares != null)
+            cookingSquares.UpdateValue(employeeData.cookingSkill);
+
+        if (serviceSquares != null)
+            serviceSquares.UpdateValue(employeeData.serviceSkill);
+
+        if (operationalSquares != null)
+            operationalSquares.UpdateValue(employeeData.operationalSkill);
+
+        if (agilitySquares != null)
+            agilitySquares.UpdateValue(employeeData.agility);
     }
 
     private void UpdateStatusIcon(Image slot, Sprite icon)
