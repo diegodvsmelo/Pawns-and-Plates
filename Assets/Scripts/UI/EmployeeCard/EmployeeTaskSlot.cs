@@ -1,10 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
 {
-    [Header("Rules")]
-    [SerializeField] private bool allowReplace = false;
+    public event Action OnSlotChanged;
 
     public EmployeeCardUI CurrentCard { get; private set; }
 
@@ -12,28 +12,29 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
 
     public void OnDrop(PointerEventData eventData)
     {
-        EmployeeCardDraggable draggable = eventData.pointerDrag != null
+        EmployeeCardDraggable incomingDraggable = eventData.pointerDrag != null
             ? eventData.pointerDrag.GetComponent<EmployeeCardDraggable>()
             : null;
 
-        if (draggable == null || draggable.EmployeeCardUI == null)
+        if (incomingDraggable == null || incomingDraggable.EmployeeCardUI == null)
             return;
 
-        if (!allowReplace && !IsEmpty)
+        EmployeeCardUI incomingCard = incomingDraggable.EmployeeCardUI;
+
+        if (CurrentCard == incomingCard)
         {
-            draggable.ReturnToOriginalParent();
+            incomingDraggable.MarkDroppedOnValidTarget();
+            PlaceCard(incomingDraggable);
             return;
         }
 
-        if (!IsEmpty && allowReplace)
+        if (IsEmpty)
         {
-            EmployeeCardDraggable currentDraggable = CurrentCard.GetComponent<EmployeeCardDraggable>();
-
-            if (currentDraggable != null)
-                currentDraggable.ReturnToOriginalParent();
+            PlaceCard(incomingDraggable);
+            return;
         }
 
-        PlaceCard(draggable);
+        SwapCards(incomingDraggable);
     }
 
     private void PlaceCard(EmployeeCardDraggable draggable)
@@ -53,10 +54,50 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
         }
 
         draggable.MarkDroppedOnValidTarget();
+
+        OnSlotChanged?.Invoke();
     }
 
-    public void ClearSlot()
+    private void SwapCards(EmployeeCardDraggable incomingDraggable)
+    {
+        EmployeeCardUI oldCard = CurrentCard;
+
+        if (oldCard == null)
+        {
+            PlaceCard(incomingDraggable);
+            return;
+        }
+
+        EmployeeCardDraggable oldDraggable = oldCard.GetComponent<EmployeeCardDraggable>();
+
+        if (oldDraggable == null)
+        {
+            PlaceCard(incomingDraggable);
+            return;
+        }
+
+        Transform incomingOriginalParent = incomingDraggable.OriginalParent;
+        int incomingOriginalSiblingIndex = incomingDraggable.OriginalSiblingIndex;
+
+        PlaceCard(incomingDraggable);
+
+        oldDraggable.MoveToParent(incomingOriginalParent, incomingOriginalSiblingIndex);
+
+        OnSlotChanged?.Invoke();
+    }
+
+    public void ClearSlot(EmployeeCardUI card)
+    {
+        if (CurrentCard != card)
+            return;
+
+        CurrentCard = null;
+        OnSlotChanged?.Invoke();
+    }
+
+    public void ForceClearSlot()
     {
         CurrentCard = null;
+        OnSlotChanged?.Invoke();
     }
 }

@@ -12,13 +12,7 @@ public class EmployeeSidebarDropArea : MonoBehaviour, IDropHandler
         if (draggable == null)
             return;
 
-        RectTransform cardRect = draggable.GetComponent<RectTransform>();
-
-        draggable.transform.SetParent(transform, false);
-
-        if (cardRect != null)
-            cardRect.anchoredPosition = Vector2.zero;
-
+        draggable.MoveToParent(transform);
         draggable.MarkDroppedOnValidTarget();
     }
 }

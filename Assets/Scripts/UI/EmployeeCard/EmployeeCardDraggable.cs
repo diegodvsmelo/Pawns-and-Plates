@@ -14,10 +14,13 @@ public class EmployeeCardDraggable : MonoBehaviour, IBeginDragHandler, IDragHand
     private Transform originalParent;
     private int originalSiblingIndex;
     private Vector2 originalAnchoredPosition;
-    private EmployeeTaskSlot originalTaskSlot;
+
     private bool droppedOnValidTarget;
 
     public EmployeeCardUI EmployeeCardUI { get; private set; }
+
+    public Transform OriginalParent => originalParent;
+    public int OriginalSiblingIndex => originalSiblingIndex;
 
     private void Awake()
     {
@@ -50,10 +53,12 @@ public class EmployeeCardDraggable : MonoBehaviour, IBeginDragHandler, IDragHand
         originalSiblingIndex = transform.GetSiblingIndex();
         originalAnchoredPosition = rectTransform.anchoredPosition;
 
-        originalTaskSlot = originalParent != null ? originalParent.GetComponent<EmployeeTaskSlot>() : null;
+        EmployeeTaskSlot originalTaskSlot = originalParent != null
+            ? originalParent.GetComponent<EmployeeTaskSlot>()
+            : null;
 
         if (originalTaskSlot != null)
-            originalTaskSlot.ClearSlot();
+            originalTaskSlot.ClearSlot(EmployeeCardUI);
 
         transform.SetParent(dragLayer, true);
         transform.SetAsLastSibling();
@@ -86,11 +91,23 @@ public class EmployeeCardDraggable : MonoBehaviour, IBeginDragHandler, IDragHand
 
     public void ReturnToOriginalParent()
     {
-        if (originalParent == null)
+        MoveToParent(originalParent, originalSiblingIndex);
+        rectTransform.anchoredPosition = originalAnchoredPosition;
+    }
+
+    public void MoveToParent(Transform targetParent, int siblingIndex = -1)
+    {
+        if (targetParent == null)
             return;
 
-        transform.SetParent(originalParent, false);
-        transform.SetSiblingIndex(originalSiblingIndex);
-        rectTransform.anchoredPosition = originalAnchoredPosition;
+        transform.SetParent(targetParent, false);
+
+        if (siblingIndex >= 0 && siblingIndex < targetParent.childCount)
+            transform.SetSiblingIndex(siblingIndex);
+
+        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.anchoredPosition = Vector2.zero;
     }
 }

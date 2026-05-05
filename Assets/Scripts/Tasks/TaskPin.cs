@@ -141,10 +141,12 @@ public class TaskPin : MonoBehaviour
             return;
         }
 
-        Debug.Log($"StartExecution chamado para: {data.taskName}");
+        ResumeTimer();
 
         Instance.remainingExecutionTime = data.executionTime;
         SetState(TaskState.InProgress);
+
+        Debug.Log($"Task '{data.taskName}' entrou em execução por {data.executionTime} segundos.");
     }
 
     public void SetState(TaskState newState)

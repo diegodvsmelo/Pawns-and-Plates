@@ -28,6 +28,8 @@ public class TaskSpawner : MonoBehaviour
     private bool isSpawningActive;
     private GameManager gameManager;
     private Coroutine spawnCoroutine;
+    [Header("Task Team Selection")]
+    [SerializeField] private TaskTeamSelectionUI taskTeamSelectionUI;
 
     private void Awake()
     {
@@ -215,8 +217,17 @@ public class TaskSpawner : MonoBehaviour
 
         if (taskPin.CurrentState == TaskState.Available)
         {
-            Debug.Log($"Clicou na task: {taskPin.data.taskName}. Iniciando execução para teste.");
-            taskPin.StartExecution();
+            Debug.Log($"Abrindo seleção de equipe para task: {taskPin.data.taskName}");
+
+            if (taskTeamSelectionUI != null)
+            {
+                taskTeamSelectionUI.Open(taskPin);
+            }
+            else
+            {
+                Debug.LogWarning("TaskSpawner está sem referência para TaskTeamSelectionUI.");
+            }
+
             return;
         }
 
