@@ -1,155 +1,321 @@
-# Pawns&Plates (Working name)
+# Paws&Plates
 
-Pawns&Plates (Working name) is a **tactical restaurant management game** in development with Unity, centered around **dispatching staff to time-sensitive tasks** across a growing restaurant.
+**Paws&Plates** is a tactical restaurant management game in development with Unity, centered around dispatching staff to time-sensitive tasks across a growing restaurant.
 
-Instead of relying on passive “preparation timers” as the main interaction, the game turns restaurant flow into an active decision-making system: tasks appear on the map, the player evaluates requirements, assigns the best available employees, manages stamina and recovery, and expands the restaurant while keeping the operation under control.
+Instead of relying on passive preparation timers as the main interaction, the game turns restaurant operation into an active decision-making system: tasks appear on specific restaurant structures, the player evaluates the demand, assigns employees manually, manages stamina, and expands the restaurant while keeping the operation under control.
 
-## Features
+## Core Concept
 
-* Tactical staff dispatch system
-* Employee stats, stamina, and progression
-* Time-sensitive restaurant tasks
-* Operational vs customer-facing task balance
-* Reputation-based restaurant growth
-* Hiring and team-building systems
-* Daily management loop with end-of-day reports
-* Expandable restaurant structure through new stations and furniture
-* Camera drag and zoom controls for map navigation
+The player manages a restaurant through tactical staff dispatch.
 
-## Gameplay Overview
+Tasks can represent:
 
-The core gameplay loop is built around six steps:
+- taking customer orders;
+- preparing food;
+- cleaning tables;
+- washing dishes;
+- repairing equipment;
+- solving operational issues.
 
-1. **A task appears**
-   Orders or operational issues spawn on restaurant stations.
+Each task appears as a **TaskPin** over the structure that generated it, such as a table, cashier, grill, oven, sink, or other station.
 
-2. **The player evaluates the task**
-   Each task has requirements, timing pressure, and a calculated success chance.
+## Current Gameplay Flow
 
-3. **The player assigns a team**
-   Employees are selected manually based on stats, availability, and stamina.
+Current implemented/prototyped flow:
 
-4. **The task enters execution**
-   Assigned staff become occupied until the task is resolved.
+1. A TaskPin spawns over a compatible restaurant structure.
+2. The player clicks the TaskPin.
+3. The Task Team Selection screen opens.
+4. The task timer pauses while the player evaluates the task.
+5. The player drags employee cards into task slots.
+6. TeamStats updates the selected team’s total attributes.
+7. The player dispatches the team.
+8. The task enters execution.
+9. When execution finishes, the task becomes ready to collect.
+10. Clicking the finished TaskPin applies rewards or penalties.
 
-5. **The player collects the result**
-   Rewards, penalties, stamina cost, and any buffs or debuffs are applied when the result is opened.
-
-6. **The restaurant grows**
-   Money and reputation are used to improve the operation, unlock new options, and push toward the final evaluation.
-
-## Core Systems
-
-### Employees
-
-Each employee has core attributes:
-
-* **Cooking**
-* **Service**
-* **Operational**
-* **Agility**
-* **Stamina**
-
-Employees are intended to feel valuable rather than disposable. Some may also come with unique traits that make them especially useful in specific situations.
+## Main Systems
 
 ### Tasks
 
-Tasks are the main gameplay unit. They can represent:
+Tasks are defined through `TaskData`.
 
-* customer orders
-* urgent requests
-* infrastructure problems
-* internal operational demands
+Each TaskData can define:
 
-Tasks move through clear states:
+- task name;
+- description;
+- task type;
+- outcome flow;
+- expiration time;
+- execution time;
+- max employee slots;
+- difficulty points;
+- required attributes;
+- stamina cost;
+- money reward;
+- reputation reward;
+- reputation penalty;
+- XP rewards;
+- task icon and color.
 
-* available
-* in progress
-* waiting for result collection
+The runtime state of a task is handled separately by `TaskInstance`.
 
-### Stamina and Rest
+### Task States
 
-Stamina limits how much work an employee can perform before needing recovery.
+Tasks currently support these states:
 
-The player can manually send employees to rest, and employees who reach zero stamina are forced into full recovery automatically.
+- Available;
+- In Progress;
+- Ready To Collect;
+- Expired;
+- Completed.
 
-### Progression
+### Task Pins
 
-Progression is tied to:
+TaskPins are the visual and clickable representation of tasks in the scene.
 
-* reputation
-* restaurant prestige tiers
-* new stations and furniture
-* staff hiring
-* better team composition
+Current behavior:
 
-The long-term goal is to build enough prestige to attract a critic and succeed in the final evaluation day.
+- Available tasks count down until expiration.
+- Dispatching a team starts execution.
+- Execution has its own timer.
+- Finished tasks become ready to collect.
+- Expired tasks apply penalties when collected.
+- Ready tasks apply rewards when collected.
 
-## Current Development Status
+### Task Generator Structures
 
-The project currently includes:
+Tasks spawn on specific restaurant structures.
 
-* task spawning on the restaurant map
-* team slot assignment
-* success chance calculation
-* employee XP and leveling
-* manual stat allocation
-* stamina system
-* daily cycle and financial report
-* manager-based project structure
-* observer/event-based architecture foundations
-* draggable orthographic camera with zoom
+Each structure can hold only one task at a time.
+
+Examples:
+
+- Cashier → Service tasks;
+- Table → Service / Operational tasks;
+- Grill / Stove / Oven → Cooking / Operational tasks;
+- Sink → Operational tasks.
+
+### Task Team Selection
+
+When the player clicks an available TaskPin, the Task Team Selection screen opens.
+
+It currently supports:
+
+- task name and description display;
+- dynamic generation of employee slots based on `TaskData.maxSlots`;
+- expanded employee cards;
+- drag and drop into task slots;
+- TeamStats visual update;
+- dispatching selected employees.
+
+### Employees
+
+Employees are defined through ScriptableObjects and have:
+
+- Cooking;
+- Service;
+- Operational;
+- Agility;
+- stamina;
+- XP;
+- level;
+- skill points;
+- optional trait;
+- status icons.
+
+Employee attributes range from 1 to 10.
+
+When employees are assigned to a task, their attributes are summed into team attributes, capped at 10 per attribute.
+
+Example:
+
+- Employee A: Service 6
+- Employee B: Service 8
+- Team Service: 10
+
+### Employee Cards
+
+There are currently two employee card formats:
+
+- compact cards for normal sidebar display;
+- expanded cards for task team selection.
+
+Expanded cards show:
+
+- portrait;
+- name;
+- level;
+- trait;
+- stamina;
+- XP;
+- status icons;
+- Cooking;
+- Service;
+- Operational;
+- Agility.
+
+Attributes are displayed as 10-square bars with colored filled squares.
+
+### TeamStats
+
+TeamStats displays the total attributes of the currently selected team during task selection.
+
+It updates whenever a card is placed, removed, or swapped in a task slot.
+
+### Stamina
+
+In the design target, stamina should be consumed when the task result is collected.
+
+In the current prototype, stamina is consumed on Dispatch to validate UI feedback and employee card updates earlier.
+
+### Reputation
+
+Reputation is displayed through a star-based UI with partial progress.
+
+The fill is hidden when:
+
+- reputation is zero;
+- reputation is exactly at a star threshold;
+- reputation is at maximum.
 
 ## Built With
 
-* **Unity**
-* **C#**
-* **Unity Input System**
-* **ScriptableObjects** for data-driven configuration
+- Unity
+- C#
+- Unity Input System
+- ScriptableObjects for data-driven configuration
 
-## Project Goals
+## Current Development Status
 
-The project is being developed with a focus on:
+Implemented / prototyped:
 
-* a realistic solo-dev scope
-* modular architecture
-* readable UI and game state clarity
-* tactical decision-making over fast reflexes
-* a short but satisfying progression arc
+- Main menu structure;
+- Options menu with audio sliders;
+- AudioManager base;
+- camera drag and zoom;
+- ResourceManager with observer events;
+- MoneyUI and ReputationUI;
+- TaskData structure;
+- TaskInstance runtime structure;
+- TaskPin state/timer flow;
+- Task spawning on world structures;
+- TaskGeneratorStructure;
+- one active task per structure;
+- TaskTeamSelectionUI;
+- dynamic employee task slots;
+- employee drag and drop;
+- compact and expanded employee cards;
+- visual employee attributes;
+- TeamStats attribute display;
+- basic reward and penalty collection;
+- stamina consumption on dispatch for prototype testing.
+
+## Roadmap
+
+### Phase 1 — Current Task Selection Foundation
+
+- [x] Define new TaskData structure
+- [x] Separate TaskData from TaskInstance
+- [x] Implement TaskPin states
+- [x] Implement TaskPin countdown slider
+- [x] Spawn TaskPins on world structures
+- [x] Restrict structures to one active task
+- [x] Open Task Team Selection from TaskPin
+- [x] Generate task slots based on maxSlots
+- [x] Drag employee cards into task slots
+- [x] Show expanded employee cards
+- [x] Display TeamStats from selected employees
+- [x] Consume stamina on dispatch for prototype feedback
+- [ ] Finalize TeamStats refresh on every drag/drop edge case
+- [ ] Prevent unavailable or exhausted employees from being assigned
+- [ ] Improve visual feedback for selected / occupied employees
+
+### Phase 2 — Task Resolution
+
+- [ ] Calculate task success chance from TaskData requirements
+- [ ] Display estimated success chance in Task Team Selection
+- [ ] Store calculated chance in TaskInstance
+- [ ] Roll success/failure when collecting result
+- [ ] Apply money reward on success
+- [ ] Apply reputation reward or penalty
+- [ ] Apply XP to assigned employees
+- [ ] Apply stamina cost at final intended timing
+- [ ] Add critical / 100% chance reward behavior
+
+### Phase 3 — Employee Availability and Rest
+
+- [ ] Mark assigned employees as occupied
+- [ ] Prevent occupied employees from appearing as available
+- [ ] Release employees only after result collection
+- [ ] Add manual rest command
+- [ ] Add passive stamina recovery
+- [ ] Add forced full rest at zero stamina
+
+### Phase 4 — Order Flow
+
+- [ ] Implement RestaurantOrder runtime object
+- [ ] Service task generates order
+- [ ] Order identifies required cooking structure
+- [ ] Cooking task spawns on correct structure
+- [ ] Cooking task resolves order delivery
+- [ ] Table enters eating state
+- [ ] Table generates cleaning task or new service request
+
+### Phase 5 — Operational Flow
+
+- [ ] Cooking tasks can generate sink cleaning tasks
+- [ ] Tables can become dirty
+- [ ] Cleaning tasks free structures
+- [ ] Operational tasks can repair structures
+
+### Phase 6 — Structure Wear and Malfunctions
+
+- [ ] Add wear accumulation to cooking structures
+- [ ] Roll malfunction chance after cooking tasks
+- [ ] Implement temporary structure block
+- [ ] Implement penalty to next tasks
+- [ ] Generate repair tasks
+- [ ] Balance malfunction frequency and severity
+
+### Phase 7 — Daily Loop and Progression
+
+- [ ] Stop new tasks when day timer ends
+- [ ] Let active tasks finish before ending day
+- [ ] Generate end-of-day report
+- [ ] Connect revenue and payroll
+- [ ] Add reputation tiers
+- [ ] Unlock team size / stations / hiring by progression
+- [ ] Implement shop cadence
+- [ ] Implement hiring cadence
+
+### Phase 8 — 1.0 Systems
+
+- [ ] Trait system integration
+- [ ] Debuff system
+- [ ] Buff / reward for 100% chance
+- [ ] Save/load
+- [ ] Final critic day
+- [ ] Game feel pass
+- [ ] UI polish
+- [ ] Audio feedback polish
 
 ## Planned Scope for 1.0
 
 The current 1.0 target includes:
 
-* complete daily gameplay loop
-* reputation and prestige progression
-* restaurant expansion through purchasable stations
-* hiring new employees
-* basic buffs and debuffs
-* initial trait system
-* final critic/endgame objective
+- complete daily gameplay loop;
+- task dispatch and resolution;
+- manual team selection;
+- employee stamina and progression;
+- reputation and prestige tiers;
+- restaurant expansion through purchasable stations;
+- hiring;
+- basic buffs and debuffs;
+- initial trait system;
+- final critic/endgame objective.
 
-More advanced systems such as emergent traits, complex random events, free layout placement, and decoration-focused customization are considered possible future expansions rather than current priorities.
-
-## Roadmap
-
-* [x] Core task flow
-* [x] Employee stats and progression
-* [x] Stamina management
-* [x] Daily cycle foundation
-* [x] Camera navigation
-* [ ] Restaurant expansion system
-* [ ] Hiring flow
-* [ ] Buff/debuff implementation
-* [ ] Visual Assets Creation and Implementation
-* [ ] Trait system integration
-* [ ] Final critic progression
-* [ ] Save/load
-* [ ] Game Feel
-
-## Screenshots
-
-Screenshots and gameplay previews will be added as development progresses.
+Advanced systems such as emergent traits, complex random events, free layout placement, and deep decoration customization are considered future expansion possibilities.
 
 ## Installation
 
@@ -157,15 +323,16 @@ This repository contains a Unity project.
 
 To open it:
 
-1. Clone the repository
-2. Open the project with the appropriate Unity version
-3. Let Unity import dependencies
-4. Run the main scene from the editor
+1. Clone the repository.
+2. Open the project with the correct Unity version.
+3. Let Unity import dependencies.
+4. Open the main scene.
+5. Run the project from the editor.
 
 ## Status
 
-**Work in progress.**
+Work in progress.
 
 ## Author
 
-Developed by **Diego Davis**.
+Developed by Diego Davis.
