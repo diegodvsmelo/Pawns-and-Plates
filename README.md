@@ -227,8 +227,7 @@ Implemented / prototyped:
 - [x] Show expanded employee cards
 - [x] Display TeamStats from selected employees
 - [x] Consume stamina on dispatch for prototype feedback
-- [ ] Finalize TeamStats refresh on every drag/drop edge case
-- [ ] Prevent unavailable or exhausted employees from being assigned
+- [x] Finalize TeamStats refresh on every drag/drop edge case
 - [ ] Improve visual feedback for selected / occupied employees
 
 ### Phase 2 — Task Resolution
@@ -245,6 +244,7 @@ Implemented / prototyped:
 
 ### Phase 3 — Employee Availability and Rest
 
+- [ ] Prevent unavailable or exhausted employees from being assigned
 - [ ] Mark assigned employees as occupied
 - [ ] Prevent occupied employees from appearing as available
 - [ ] Release employees only after result collection

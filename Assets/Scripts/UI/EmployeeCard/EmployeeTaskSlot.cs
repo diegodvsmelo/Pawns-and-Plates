@@ -2,12 +2,28 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
+public class EmployeeTaskSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
 {
+    [Header("Animation")]
+    [SerializeField] private float placementAnimationDuration = 0.10f;
+    [SerializeField] private float swapAnimationDuration = 0.14f;
+
     public event Action OnSlotChanged;
 
     public EmployeeCardUI CurrentCard { get; private set; }
     public bool IsEmpty => CurrentCard == null;
+
+    private TaskTeamSelectionUI ownerUI;
+
+    private void Awake()
+    {
+        ownerUI = GetComponentInParent<TaskTeamSelectionUI>(true);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        ownerUI?.OnTaskSlotClicked(this);
+    }
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -18,75 +34,149 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
         if (incomingDraggable == null || incomingDraggable.EmployeeCardUI == null)
             return;
 
+        TryReceiveCard(incomingDraggable, animate: true);
+    }
+
+    public bool TryReceiveCardByClick(EmployeeCardUI card)
+    {
+        if (card == null)
+            return false;
+
+        EmployeeCardDraggable draggable = card.GetComponent<EmployeeCardDraggable>();
+
+        if (draggable == null)
+            return false;
+
+        return TryReceiveCard(draggable, animate: true);
+    }
+
+    private bool TryReceiveCard(EmployeeCardDraggable incomingDraggable, bool animate)
+    {
         EmployeeCardUI incomingCard = incomingDraggable.EmployeeCardUI;
 
-        EmployeeTaskSlot originSlot = incomingDraggable.OriginalParent != null
-            ? incomingDraggable.OriginalParent.GetComponent<EmployeeTaskSlot>()
-            : null;
+        ResolveSource(
+            incomingDraggable,
+            out Transform sourceParent,
+            out int sourceSiblingIndex,
+            out EmployeeTaskSlot sourceSlot
+        );
 
-        // Caso raro: soltou no mesmo slot de onde saiu
-        if (CurrentCard == incomingCard)
-        {
-            AssignCardToThisSlot(incomingDraggable, notify: true);
-            return;
-        }
+        if (sourceSlot == this && CurrentCard == incomingCard)
+            return false;
+
+        if (sourceSlot != null && sourceSlot != this && sourceSlot.CurrentCard == incomingCard)
+            sourceSlot.ClearSlot(incomingCard);
 
         if (IsEmpty)
         {
-            AssignCardToThisSlot(incomingDraggable, notify: true);
-            return;
+            AssignCardToThisSlot(
+                incomingDraggable,
+                animate ? placementAnimationDuration : 0f,
+                notify: true
+            );
+
+            return true;
         }
 
-        SwapCards(incomingDraggable, originSlot);
+        return SwapCards(
+            incomingDraggable,
+            sourceParent,
+            sourceSiblingIndex,
+            sourceSlot,
+            animate
+        );
     }
 
-    private void SwapCards(EmployeeCardDraggable incomingDraggable, EmployeeTaskSlot originSlot)
+    private bool SwapCards(
+        EmployeeCardDraggable incomingDraggable,
+        Transform sourceParent,
+        int sourceSiblingIndex,
+        EmployeeTaskSlot sourceSlot,
+        bool animate)
     {
         EmployeeCardUI oldCard = CurrentCard;
 
         if (oldCard == null)
         {
-            AssignCardToThisSlot(incomingDraggable, notify: true);
-            return;
+            AssignCardToThisSlot(
+                incomingDraggable,
+                animate ? placementAnimationDuration : 0f,
+                notify: true
+            );
+
+            return true;
         }
 
         EmployeeCardDraggable oldDraggable = oldCard.GetComponent<EmployeeCardDraggable>();
 
         if (oldDraggable == null)
         {
-            AssignCardToThisSlot(incomingDraggable, notify: true);
-            return;
+            AssignCardToThisSlot(
+                incomingDraggable,
+                animate ? placementAnimationDuration : 0f,
+                notify: true
+            );
+
+            return true;
         }
 
-        Transform incomingOriginalParent = incomingDraggable.OriginalParent;
-        int incomingOriginalSiblingIndex = incomingDraggable.OriginalSiblingIndex;
+        float duration = animate ? swapAnimationDuration : 0f;
 
-        // 1) O novo card entra neste slot
-        AssignCardToThisSlot(incomingDraggable, notify: true);
+        AssignCardToThisSlot(incomingDraggable, duration, notify: true);
 
-        // 2) O card antigo volta para a origem do card novo
-        if (originSlot != null && originSlot != this)
+        if (sourceSlot != null && sourceSlot != this)
         {
-            originSlot.AssignCardToThisSlot(oldDraggable, notify: true);
+            sourceSlot.AssignCardToThisSlot(oldDraggable, duration, notify: true);
         }
         else
         {
-            oldDraggable.MoveToParent(incomingOriginalParent, incomingOriginalSiblingIndex);
+            if (duration > 0f)
+                oldDraggable.MoveToParentAnimated(sourceParent, duration, sourceSiblingIndex);
+            else
+                oldDraggable.MoveToParent(sourceParent, sourceSiblingIndex);
         }
+
+        return true;
     }
 
-    private void AssignCardToThisSlot(EmployeeCardDraggable draggable, bool notify)
+    private void AssignCardToThisSlot(EmployeeCardDraggable draggable, float animationDuration, bool notify)
     {
         if (draggable == null || draggable.EmployeeCardUI == null)
             return;
 
         CurrentCard = draggable.EmployeeCardUI;
 
-        draggable.MoveToParent(transform);
+        if (animationDuration > 0f)
+            draggable.MoveToParentAnimated(transform, animationDuration);
+        else
+            draggable.MoveToParent(transform);
+
         draggable.MarkDroppedOnValidTarget();
 
         if (notify)
             OnSlotChanged?.Invoke();
+    }
+
+    private void ResolveSource(
+        EmployeeCardDraggable draggable,
+        out Transform sourceParent,
+        out int sourceSiblingIndex,
+        out EmployeeTaskSlot sourceSlot)
+    {
+        if (draggable.IsDragging)
+        {
+            sourceParent = draggable.OriginalParent;
+            sourceSiblingIndex = draggable.OriginalSiblingIndex;
+        }
+        else
+        {
+            sourceParent = draggable.transform.parent;
+            sourceSiblingIndex = draggable.transform.GetSiblingIndex();
+        }
+
+        sourceSlot = sourceParent != null
+            ? sourceParent.GetComponent<EmployeeTaskSlot>()
+            : null;
     }
 
     public void ClearSlot(EmployeeCardUI card)

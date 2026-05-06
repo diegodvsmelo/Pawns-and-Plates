@@ -3,6 +3,14 @@ using UnityEngine.EventSystems;
 
 public class EmployeeSidebarDropArea : MonoBehaviour, IDropHandler
 {
+    [SerializeField] private Transform cardsReturnContainer;
+
+    private void Awake()
+    {
+        if (cardsReturnContainer == null)
+            cardsReturnContainer = transform;
+    }
+
     public void OnDrop(PointerEventData eventData)
     {
         EmployeeCardDraggable draggable = eventData.pointerDrag != null
@@ -12,7 +20,7 @@ public class EmployeeSidebarDropArea : MonoBehaviour, IDropHandler
         if (draggable == null)
             return;
 
-        draggable.MoveToParent(transform);
+        draggable.MoveToParent(cardsReturnContainer);
         draggable.MarkDroppedOnValidTarget();
     }
 }

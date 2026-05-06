@@ -5,6 +5,7 @@ using TMPro;
 
 public class TaskTeamSelectionUI : MonoBehaviour
 {
+    private EmployeeCardUI clickSelectedCard;
     [Header("Root")]
     [SerializeField] private GameObject elements;
 
@@ -62,6 +63,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
     {
         if (taskPin == null || taskPin.data == null)
             return;
+        ClearClickSelectedCard();
 
         currentTaskPin = taskPin;
         currentTaskData = taskPin.data;
@@ -81,6 +83,60 @@ public class TaskTeamSelectionUI : MonoBehaviour
         RefreshTeamStats();
     }
 
+    public void OnEmployeeCardClicked(EmployeeCardUI card)
+    {
+        if (card == null)
+            return;
+
+        if (clickSelectedCard == card)
+        {
+            SetClickSelectedCard(null);
+            return;
+        }
+
+        SetClickSelectedCard(card);
+    }
+
+    public void OnTaskSlotClicked(EmployeeTaskSlot slot)
+    {
+        if (slot == null || clickSelectedCard == null)
+            return;
+
+        bool placed = slot.TryReceiveCardByClick(clickSelectedCard);
+
+        if (placed)
+            SetClickSelectedCard(null);
+    }
+
+    private void SetClickSelectedCard(EmployeeCardUI newSelectedCard)
+    {
+        if (clickSelectedCard == newSelectedCard)
+            return;
+
+        if (clickSelectedCard != null)
+        {
+            EmployeeCardVisuals previousVisuals = clickSelectedCard.GetComponent<EmployeeCardVisuals>();
+
+            if (previousVisuals != null)
+                previousVisuals.SetSelected(false);
+        }
+
+        clickSelectedCard = newSelectedCard;
+
+        if (clickSelectedCard != null)
+        {
+            EmployeeCardVisuals newVisuals = clickSelectedCard.GetComponent<EmployeeCardVisuals>();
+
+            if (newVisuals != null)
+                newVisuals.SetSelected(true);
+        }
+    }
+
+    private void ClearClickSelectedCard()
+    {
+        SetClickSelectedCard(null);
+    }
+
     private void RefreshTeamStats()
     {
         if (teamStatsUI == null)
@@ -98,7 +154,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         if (expandedCardListUI != null)
             expandedCardListUI.Clear();
-
+        ClearClickSelectedCard();
         currentTaskPin = null;
         currentTaskData = null;
 
@@ -183,6 +239,8 @@ public class TaskTeamSelectionUI : MonoBehaviour
         if (currentTaskPin == null || currentTaskPin.Instance == null)
             return;
 
+        ClearClickSelectedCard();
+        
         List<EmployeeData> selectedEmployees = GetSelectedEmployees();
 
         if (selectedEmployees.Count == 0)
