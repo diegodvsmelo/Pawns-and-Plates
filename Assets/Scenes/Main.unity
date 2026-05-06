@@ -1800,6 +1800,61 @@ MonoBehaviour:
   elasticExtraDistance: 2.5
   elasticResistance: 0.35
   returnSpeed: 8
+--- !u!1 &375976974
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 375976975}
+  - component: {fileID: 375976976}
+  m_Layer: 5
+  m_Name: HintsPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &375976975
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375976974}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 881344847}
+  m_Father: {fileID: 1445699136}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -438.38, y: -255.91}
+  m_SizeDelta: {x: 526.24, y: 369.83002}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &375976976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375976974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81be8ea0cc711d649843569747f8a54a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TaskHintsPanelUI
+  hintsContainer: {fileID: 881344847}
+  hintLinePrefab: {fileID: 5899520381908972807, guid: 438ac9388ff48fc41be926fca280fe7d, type: 3}
+  cookingColor: {r: 0.8470589, g: 0.29803923, b: 0.2392157, a: 1}
+  serviceColor: {r: 0.9803922, g: 0.6745098, b: 0.21176472, a: 1}
+  operationalColor: {r: 0.4039216, g: 0.7176471, b: 0.38823533, a: 1}
+  agilityColor: {r: 0.25882354, g: 0.5019608, b: 0.69411767, a: 1}
 --- !u!1 &396070328
 GameObject:
   m_ObjectHideFlags: 0
@@ -3989,6 +4044,68 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 825208079}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &881344846
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 881344847}
+  - component: {fileID: 881344849}
+  m_Layer: 5
+  m_Name: HintsContainers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &881344847
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881344846}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 375976975}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 526.24, y: 369.83}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &881344849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881344846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 10
+  m_ChildAlignment: 0
+  m_Spacing: 5
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &898453243
 GameObject:
   m_ObjectHideFlags: 0
@@ -4452,6 +4569,7 @@ MonoBehaviour:
   elements: {fileID: 36718638}
   taskNameText: {fileID: 447902048}
   taskDescriptionText: {fileID: 1002396250}
+  taskHintsPanelUI: {fileID: 375976976}
   expandedCardListUI: {fileID: 1371706096}
   selectedEmployeeSlotsContainer: {fileID: 1149313121}
   taskSlotEmployeePrefab: {fileID: 5806185163951699957, guid: 97fcd661a88a3054aa9d842c6309da29, type: 3}
@@ -4618,7 +4736,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1012947064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7164,6 +7282,7 @@ RectTransform:
   - {fileID: 1403200133}
   - {fileID: 7369672210787795986}
   - {fileID: 1863348933}
+  - {fileID: 375976975}
   m_Father: {fileID: 36718639}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
   m_Name: Prepare Burguer
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
-  taskName: FAZER HAMBURGUER
-  description: Assar e empratar hamburguer
+  taskName: Prepare Burguer
+  description: Cook and plate a hamburger.
   taskType: 1
   outcomeFlow: 2
   maxSlots: 3
@@ -27,6 +27,15 @@ MonoBehaviour:
     weight: 0.3
   - skillType: 2
     weight: 0.15
+  taskHints:
+  - prefixText: '- Be careful to not '
+    highlightedText: burn
+    suffixText: ' the meat.'
+    relatedSkill: 0
+  - prefixText: '- You need to go '
+    highlightedText: fast
+    suffixText: ' before the clients leave'
+    relatedSkill: 3
   staminaCost: 15
   moneyReward: 20
   reputationReward: 18

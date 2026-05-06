@@ -1,5 +1,16 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+
+[Serializable]
+public class TaskHintLine
+{
+    [TextArea(2, 3)] public string prefixText;
+    public string highlightedText;
+    [TextArea(2, 3)] public string suffixText;
+
+    public EmployeeSkillType relatedSkill;
+}
 
 [CreateAssetMenu(fileName = "New Task", menuName = "Restaurant/Task")]
 public class TaskData : ScriptableObject
@@ -22,6 +33,8 @@ public class TaskData : ScriptableObject
     [Header("Difficulty")]
     [Min(1f)] public float difficultyPoints = 5f;
     public List<TaskRequirement> requirements = new();
+
+    public List<TaskHintLine> taskHints = new List<TaskHintLine>();
 
     [Header("Costs")]
     [Min(0)] public int staminaCost = 10;

@@ -15,7 +15,7 @@ MonoBehaviour:
   taskName: SERVICO VIP
   description: ATENDER O PEDIDO DE UM CLIENTE IMPORTANTE E EXIGENTE
   taskType: 0
-  outcomeFlow: 0
+  outcomeFlow: 1
   maxSlots: 2
   expirationTime: 20
   executionTime: 5
@@ -27,6 +27,7 @@ MonoBehaviour:
     weight: 20
   - skillType: 0
     weight: 10
+  taskHints: []
   staminaCost: 45
   moneyReward: 64
   reputationReward: 30

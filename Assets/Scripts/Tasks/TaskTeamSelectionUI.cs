@@ -6,12 +6,16 @@ using TMPro;
 public class TaskTeamSelectionUI : MonoBehaviour
 {
     private EmployeeCardUI clickSelectedCard;
+
     [Header("Root")]
     [SerializeField] private GameObject elements;
 
     [Header("Task Info")]
     [SerializeField] private TextMeshProUGUI taskNameText;
     [SerializeField] private TextMeshProUGUI taskDescriptionText;
+
+    [Header("Task Hints")]
+    [SerializeField] private TaskHintsPanelUI taskHintsPanelUI;
 
     [Header("Expanded Employee Cards")]
     [SerializeField] private EmployeeCardListUI expandedCardListUI;
@@ -27,13 +31,13 @@ public class TaskTeamSelectionUI : MonoBehaviour
     [Header("Temporary Employee Source")]
     [SerializeField] private List<EmployeeData> currentEmployees = new();
 
+    [Header("Team Stats")]
+    [SerializeField] private TeamStatsUI teamStatsUI;
+
     private readonly List<EmployeeTaskSlot> generatedSlots = new();
 
     private TaskPin currentTaskPin;
     private TaskData currentTaskData;
-
-    [Header("Team Stats")]
-    [SerializeField] private TeamStatsUI teamStatsUI;
 
     private void Awake()
     {
@@ -63,6 +67,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
     {
         if (taskPin == null || taskPin.data == null)
             return;
+
         ClearClickSelectedCard();
 
         currentTaskPin = taskPin;
@@ -77,9 +82,9 @@ public class TaskTeamSelectionUI : MonoBehaviour
             elements.SetActive(true);
 
         UpdateTaskInfo();
+        RefreshTaskHints();
         GenerateEmployeeSlots(currentTaskData.maxSlots);
         RebuildExpandedEmployeeCards();
-
         RefreshTeamStats();
     }
 
@@ -145,6 +150,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
         List<EmployeeData> selectedEmployees = GetSelectedEmployees();
         teamStatsUI.UpdateFromEmployees(selectedEmployees);
     }
+
     public void Close()
     {
         if (currentTaskPin != null && currentTaskPin.CurrentState == TaskState.Available)
@@ -154,7 +160,10 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         if (expandedCardListUI != null)
             expandedCardListUI.Clear();
+
+        ClearTaskHints();
         ClearClickSelectedCard();
+
         currentTaskPin = null;
         currentTaskData = null;
 
@@ -181,6 +190,26 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         if (taskDescriptionText != null)
             taskDescriptionText.text = currentTaskData.description;
+    }
+
+    private void RefreshTaskHints()
+    {
+        if (taskHintsPanelUI == null)
+            return;
+
+        if (currentTaskData == null)
+        {
+            taskHintsPanelUI.ClearHints();
+            return;
+        }
+
+        taskHintsPanelUI.ShowHints(currentTaskData);
+    }
+
+    private void ClearTaskHints()
+    {
+        if (taskHintsPanelUI != null)
+            taskHintsPanelUI.ClearHints();
     }
 
     private void GenerateEmployeeSlots(int amount)
@@ -240,7 +269,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
             return;
 
         ClearClickSelectedCard();
-        
+
         List<EmployeeData> selectedEmployees = GetSelectedEmployees();
 
         if (selectedEmployees.Count == 0)
@@ -269,6 +298,8 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         if (expandedCardListUI != null)
             expandedCardListUI.Clear();
+
+        ClearTaskHints();
 
         currentTaskPin = null;
         currentTaskData = null;
@@ -308,7 +339,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
         if (expandedCardListUI != null)
             expandedCardListUI.Refresh();
     }
-    
+
     private List<EmployeeData> GetSelectedEmployees()
     {
         List<EmployeeData> selectedEmployees = new();
