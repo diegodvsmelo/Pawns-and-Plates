@@ -16,7 +16,7 @@ MonoBehaviour:
   description: Assar e empratar hamburguer
   taskType: 1
   outcomeFlow: 2
-  maxSlots: 2
+  maxSlots: 3
   expirationTime: 5
   executionTime: 7
   difficultyPoints: 7

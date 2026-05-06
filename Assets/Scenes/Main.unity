@@ -1458,7 +1458,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &304098812
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2233,19 +2233,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1226552248752924929, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1226552248752924929, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1415490738618719385, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1415490738618719385, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_Pivot.x
@@ -2261,7 +2261,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMin.x
@@ -2269,7 +2269,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_SizeDelta.x
@@ -2309,11 +2309,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -63
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4328,19 +4328,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1226552248752924929, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1226552248752924929, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1415490738618719385, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1415490738618719385, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_Pivot.x
@@ -4356,7 +4356,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMin.x
@@ -4364,7 +4364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_SizeDelta.x
@@ -4404,11 +4404,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -179
       objectReference: {fileID: 0}
     - target: {fileID: 4256191532580034437, guid: 2012264a47f16e3409b732371276a157, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5296,6 +5296,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1149313121}
+  - component: {fileID: 1149313123}
+  - component: {fileID: 1149313122}
   m_Layer: 5
   m_Name: SelectedEmployeeSlots
   m_TagString: Untagged
@@ -5320,8 +5322,48 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 147, y: 99}
-  m_SizeDelta: {x: 1060, y: 320}
+  m_SizeDelta: {x: 0, y: 340}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1149313122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1149313120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 2
+  m_VerticalFit: 0
+--- !u!114 &1149313123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1149313120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 160
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1165515535
 GameObject:
   m_ObjectHideFlags: 0
@@ -6063,7 +6105,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: -189, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 320, y: 242}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1279129706
 MonoBehaviour:

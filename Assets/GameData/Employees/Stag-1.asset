@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Stag-1
   m_EditorClassIdentifier: Assembly-CSharp::EmployeeData
   employeeName: Stag
-  profilePicture: {fileID: 0}
-  cookingSkill: 10
-  serviceSkill: 10
-  operationalSkill: 10
-  agility: 10
+  profilePicture: {fileID: 21300000, guid: 0f5710185e5fc1640bc50fb6453a6efe, type: 3}
+  cookingSkill: 1
+  serviceSkill: 5
+  operationalSkill: 4
+  agility: 3
   maxStamina: 100
   currentStamina: 100
   currentLevel: 1

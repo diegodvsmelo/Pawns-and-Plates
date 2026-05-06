@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5736535425483462346}
   - component: {fileID: 2800120249959141024}
   - component: {fileID: 3901288849180159233}
+  - component: {fileID: 2806551025501245874}
   m_Layer: 5
   m_Name: TaskSlotEmployee
   m_TagString: Untagged
@@ -88,4 +89,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c192002095856fe42954362142bb693a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EmployeeTaskSlot
-  allowReplace: 1
+--- !u!114 &2806551025501245874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5806185163951699957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: 200
+  m_PreferredHeight: 200
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1

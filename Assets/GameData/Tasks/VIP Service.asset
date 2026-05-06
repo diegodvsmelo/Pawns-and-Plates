@@ -14,21 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
   taskName: SERVICO VIP
   description: ATENDER O PEDIDO DE UM CLIENTE IMPORTANTE E EXIGENTE
-  timeLimit: 8
-  maxSlots: 1
-  requirements:
-  - category: 1
-    weight: 70
-  - category: 3
-    weight: 20
-  - category: 2
-    weight: 10
+  taskType: 0
+  outcomeFlow: 0
+  maxSlots: 2
+  expirationTime: 20
+  executionTime: 5
   difficultyPoints: 180
-  baseDuration: 8
+  requirements:
+  - skillType: 0
+    weight: 70
+  - skillType: 0
+    weight: 20
+  - skillType: 0
+    weight: 10
   staminaCost: 45
   moneyReward: 64
   reputationReward: 30
-  reputationPenalty: 50
   xpOnSuccess: 80
+  reputationPenalty: 50
   xpOnFailure: 30
   xpOnCritical: 180
+  bonusMoneyOnCritical: 0
+  bonusReputationOnCritical: 0
+  taskIcon: {fileID: 0}
+  taskColor: {r: 1, g: 1, b: 1, a: 1}

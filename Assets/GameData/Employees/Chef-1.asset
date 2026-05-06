@@ -17,9 +17,9 @@ MonoBehaviour:
   cookingSkill: 5
   serviceSkill: 7
   operationalSkill: 2
-  agility: 7
+  agility: 2
   maxStamina: 200
-  currentStamina: 200
+  currentStamina: 119
   currentLevel: 2
   currentXP: 0
   skillPoints: 0

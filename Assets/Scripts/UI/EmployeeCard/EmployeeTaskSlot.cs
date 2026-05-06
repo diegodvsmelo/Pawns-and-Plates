@@ -7,7 +7,6 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
     public event Action OnSlotChanged;
 
     public EmployeeCardUI CurrentCard { get; private set; }
-
     public bool IsEmpty => CurrentCard == null;
 
     public void OnDrop(PointerEventData eventData)
@@ -21,50 +20,33 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
 
         EmployeeCardUI incomingCard = incomingDraggable.EmployeeCardUI;
 
+        EmployeeTaskSlot originSlot = incomingDraggable.OriginalParent != null
+            ? incomingDraggable.OriginalParent.GetComponent<EmployeeTaskSlot>()
+            : null;
+
+        // Caso raro: soltou no mesmo slot de onde saiu
         if (CurrentCard == incomingCard)
         {
-            incomingDraggable.MarkDroppedOnValidTarget();
-            PlaceCard(incomingDraggable);
+            AssignCardToThisSlot(incomingDraggable, notify: true);
             return;
         }
 
         if (IsEmpty)
         {
-            PlaceCard(incomingDraggable);
+            AssignCardToThisSlot(incomingDraggable, notify: true);
             return;
         }
 
-        SwapCards(incomingDraggable);
+        SwapCards(incomingDraggable, originSlot);
     }
 
-    private void PlaceCard(EmployeeCardDraggable draggable)
-    {
-        CurrentCard = draggable.EmployeeCardUI;
-
-        RectTransform cardRect = draggable.GetComponent<RectTransform>();
-
-        draggable.transform.SetParent(transform, false);
-
-        if (cardRect != null)
-        {
-            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
-            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
-            cardRect.pivot = new Vector2(0.5f, 0.5f);
-            cardRect.anchoredPosition = Vector2.zero;
-        }
-
-        draggable.MarkDroppedOnValidTarget();
-
-        OnSlotChanged?.Invoke();
-    }
-
-    private void SwapCards(EmployeeCardDraggable incomingDraggable)
+    private void SwapCards(EmployeeCardDraggable incomingDraggable, EmployeeTaskSlot originSlot)
     {
         EmployeeCardUI oldCard = CurrentCard;
 
         if (oldCard == null)
         {
-            PlaceCard(incomingDraggable);
+            AssignCardToThisSlot(incomingDraggable, notify: true);
             return;
         }
 
@@ -72,18 +54,39 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
 
         if (oldDraggable == null)
         {
-            PlaceCard(incomingDraggable);
+            AssignCardToThisSlot(incomingDraggable, notify: true);
             return;
         }
 
         Transform incomingOriginalParent = incomingDraggable.OriginalParent;
         int incomingOriginalSiblingIndex = incomingDraggable.OriginalSiblingIndex;
 
-        PlaceCard(incomingDraggable);
+        // 1) O novo card entra neste slot
+        AssignCardToThisSlot(incomingDraggable, notify: true);
 
-        oldDraggable.MoveToParent(incomingOriginalParent, incomingOriginalSiblingIndex);
+        // 2) O card antigo volta para a origem do card novo
+        if (originSlot != null && originSlot != this)
+        {
+            originSlot.AssignCardToThisSlot(oldDraggable, notify: true);
+        }
+        else
+        {
+            oldDraggable.MoveToParent(incomingOriginalParent, incomingOriginalSiblingIndex);
+        }
+    }
 
-        OnSlotChanged?.Invoke();
+    private void AssignCardToThisSlot(EmployeeCardDraggable draggable, bool notify)
+    {
+        if (draggable == null || draggable.EmployeeCardUI == null)
+            return;
+
+        CurrentCard = draggable.EmployeeCardUI;
+
+        draggable.MoveToParent(transform);
+        draggable.MarkDroppedOnValidTarget();
+
+        if (notify)
+            OnSlotChanged?.Invoke();
     }
 
     public void ClearSlot(EmployeeCardUI card)
@@ -97,6 +100,9 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler
 
     public void ForceClearSlot()
     {
+        if (CurrentCard == null)
+            return;
+
         CurrentCard = null;
         OnSlotChanged?.Invoke();
     }
