@@ -228,7 +228,7 @@ Implemented / prototyped:
 - [x] Display TeamStats from selected employees
 - [x] Consume stamina on dispatch for prototype feedback
 - [x] Finalize TeamStats refresh on every drag/drop edge case
-- [ ] Improve visual feedback for selected / occupied employees
+- [x] Improve visual feedback for selected / occupied employees
 
 ### Phase 2 — Task Resolution
 
