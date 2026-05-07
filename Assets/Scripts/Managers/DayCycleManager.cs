@@ -57,9 +57,9 @@ public class DayCycleManager : MonoBehaviour
 
     public void EndDay()
     {
-        if (gameManager != null && gameManager.spawner != null)
+        //if (gameManager != null && gameManager.spawner != null)
         {
-            gameManager.spawner.StopSpawning();
+        //    gameManager.spawner.StopSpawning();
         }
 
         int totalSalaries = CalculateTotalWages();
@@ -126,9 +126,9 @@ public class DayCycleManager : MonoBehaviour
         if (dailyReportPanel != null)
             dailyReportPanel.SetActive(false);
 
-        if (gameManager != null && gameManager.spawner != null)
+        //if (gameManager != null && gameManager.spawner != null)
         {
-            gameManager.spawner.StartSpawning();
+            //gameManager.spawner.StartSpawning();
         }
     }
 

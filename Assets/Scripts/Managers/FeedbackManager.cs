@@ -46,8 +46,8 @@ public class FeedbackManager : MonoBehaviour
 
         if (gameManager != null)
         {
-            gameManager.OnMissionStarted += HandleMissionStarted;
-            gameManager.OnMissionFinished += HandleMissionFinished;
+           // gameManager.OnMissionStarted += HandleMissionStarted;
+           // gameManager.OnMissionFinished += HandleMissionFinished;
         }
     }
 
@@ -75,8 +75,8 @@ public class FeedbackManager : MonoBehaviour
 
         if (gameManager != null)
         {
-            gameManager.OnMissionStarted -= HandleMissionStarted;
-            gameManager.OnMissionFinished -= HandleMissionFinished;
+          //  gameManager.OnMissionStarted -= HandleMissionStarted;
+           // gameManager.OnMissionFinished -= HandleMissionFinished;
         }
     }
 

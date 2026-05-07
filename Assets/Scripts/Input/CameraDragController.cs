@@ -60,6 +60,12 @@ public class CameraDragController : MonoBehaviour
         if (!ActionsAreValid())
             return;
 
+        if (GameManager.Instance.isGamePaused)
+        {
+            isDragging = false;
+            return;
+        }
+
         HandleZoom();
         HandleDrag();
         HandleElasticReturn();

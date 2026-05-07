@@ -74,7 +74,9 @@ public class TaskTeamSelectionUI : MonoBehaviour
         currentTaskData = taskPin.data;
 
         if (GameManager.Instance != null)
-            GameManager.Instance.isGamePaused = true;
+            GameManager.Instance.PauseGame();
+        else
+            Debug.LogError("[TaskTeamSelectionUI] GameManager.Instance está NULL ao abrir a task.");
 
         currentTaskPin.PauseTimer();
 
@@ -82,7 +84,6 @@ public class TaskTeamSelectionUI : MonoBehaviour
             elements.SetActive(true);
 
         UpdateTaskInfo();
-        RefreshTaskHints();
         GenerateEmployeeSlots(currentTaskData.maxSlots);
         RebuildExpandedEmployeeCards();
         RefreshTeamStats();
@@ -161,7 +162,6 @@ public class TaskTeamSelectionUI : MonoBehaviour
         if (expandedCardListUI != null)
             expandedCardListUI.Clear();
 
-        ClearTaskHints();
         ClearClickSelectedCard();
 
         currentTaskPin = null;
@@ -170,8 +170,8 @@ public class TaskTeamSelectionUI : MonoBehaviour
         if (elements != null)
             elements.SetActive(false);
 
-        if (GameManager.Instance != null)
-            GameManager.Instance.isGamePaused = false;
+
+        GameManager.Instance.ResumeGame();
     }
 
     private void HideInstant()
@@ -308,7 +308,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
             elements.SetActive(false);
 
         if (GameManager.Instance != null)
-            GameManager.Instance.isGamePaused = false;
+            GameManager.Instance.ResumeGame();
     }
 
     private void ConsumeSelectedEmployeesStamina(List<EmployeeData> selectedEmployees, int staminaCost)

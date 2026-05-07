@@ -23,7 +23,6 @@ public class CharacterSheetUI : MonoBehaviour
     private EmployeeData currentData;
     private Action onUpdateCallback;
 
-    private GameManager gameManager;
 
     private int tempPoints;
     private int tempCooking;
@@ -33,21 +32,16 @@ public class CharacterSheetUI : MonoBehaviour
 
     private void Awake()
     {
-        gameManager = GameManager.Instance;
+        
     }
 
     public void OpenSheet(EmployeeData data, Action onUpdate = null)
     {
-        if (gameManager == null)
-            gameManager = GameManager.Instance;
-
         currentData = data;
         onUpdateCallback = onUpdate;
 
         gameObject.SetActive(true);
-
-        if (gameManager != null)
-            gameManager.isGamePaused = true;
+        GameManager.Instance.PauseGame();
 
         tempPoints = data.skillPoints;
         tempCooking = data.cookingSkill;
@@ -115,8 +109,7 @@ public class CharacterSheetUI : MonoBehaviour
 
         OnSheetConfirmed?.Invoke(currentData);
 
-        if (gameManager != null)
-            gameManager.isGamePaused = false;
+        GameManager.Instance.ResumeGame();
 
         gameObject.SetActive(false);
     }
@@ -125,8 +118,7 @@ public class CharacterSheetUI : MonoBehaviour
     {
         OnSheetClosedWithoutSaving?.Invoke(currentData);
 
-        if (gameManager != null)
-            gameManager.isGamePaused = false;
+        GameManager.Instance.ResumeGame();
 
         gameObject.SetActive(false);
     }
