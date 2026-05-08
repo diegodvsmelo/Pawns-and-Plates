@@ -84,6 +84,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
             elements.SetActive(true);
 
         UpdateTaskInfo();
+        RefreshTaskHints();
         GenerateEmployeeSlots(currentTaskData.maxSlots);
         RebuildExpandedEmployeeCards();
         RefreshTeamStats();
@@ -164,6 +165,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         ClearClickSelectedCard();
 
+        ClearTaskHints();
         currentTaskPin = null;
         currentTaskData = null;
 
@@ -279,6 +281,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
         }
 
         currentTaskPin.Instance.AssignEmployees(selectedEmployees);
+        currentTaskPin.Instance.CalculateAndStoreSuccessChance();
 
         ConsumeSelectedEmployeesStamina(selectedEmployees, currentTaskData.staminaCost);
         RefreshSelectedCards();
@@ -288,7 +291,9 @@ public class TaskTeamSelectionUI : MonoBehaviour
             $"Cooking: {currentTaskPin.Instance.teamCooking}, " +
             $"Service: {currentTaskPin.Instance.teamService}, " +
             $"Operational: {currentTaskPin.Instance.teamOperational}, " +
-            $"Agility: {currentTaskPin.Instance.teamAgility}"
+            $"Agility: {currentTaskPin.Instance.teamAgility}, " +
+            $"Chance: {currentTaskPin.Instance.chancePercent:F1}%, " +
+            $"Critical: {currentTaskPin.Instance.isCritical}"
         );
 
         currentTaskPin.ResumeTimer();

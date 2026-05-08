@@ -22,11 +22,9 @@ MonoBehaviour:
   difficultyPoints: 7
   requirements:
   - skillType: 0
-    weight: 1
+    requiredValue: 6
   - skillType: 3
-    weight: 0.3
-  - skillType: 2
-    weight: 0.15
+    requiredValue: 4
   taskHints:
   - prefixText: '- Be careful to not '
     highlightedText: burn

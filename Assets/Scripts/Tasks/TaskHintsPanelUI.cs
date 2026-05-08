@@ -13,21 +13,47 @@ public class TaskHintsPanelUI : MonoBehaviour
     [SerializeField] private Color operationalColor = new Color(1f, 0.85f, 0.2f);
     [SerializeField] private Color agilityColor = new Color(0.4f, 1f, 0.5f);
 
-    private readonly List<TaskHintLineUI> spawnedLines = new List<TaskHintLineUI>();
+    private readonly List<TaskHintLineUI> spawnedLines = new();
 
     public void ShowHints(TaskData taskData)
     {
         ClearHints();
 
-        if (taskData == null || taskData.taskHints == null || taskData.taskHints.Count == 0)
+        if (hintsContainer == null)
+        {
+            Debug.LogWarning("[TaskHintsPanelUI] HintsContainer não está configurado.");
             return;
+        }
+
+        if (hintLinePrefab == null)
+        {
+            Debug.LogWarning("[TaskHintsPanelUI] HintLinePrefab não está configurado.");
+            return;
+        }
+
+        if (taskData == null)
+        {
+            Debug.LogWarning("[TaskHintsPanelUI] TaskData recebido está null.");
+            return;
+        }
+
+        if (taskData.taskHints == null || taskData.taskHints.Count == 0)
+        {
+            Debug.Log($"[TaskHintsPanelUI] Task '{taskData.taskName}' não possui hints configuradas.");
+            return;
+        }
 
         foreach (TaskHintLine hint in taskData.taskHints)
         {
+            if (hint == null)
+                continue;
+
             TaskHintLineUI line = Instantiate(hintLinePrefab, hintsContainer);
             line.Setup(hint, GetColorBySkill(hint.relatedSkill));
             spawnedLines.Add(line);
         }
+
+        Debug.Log($"[TaskHintsPanelUI] {spawnedLines.Count} hint(s) instanciada(s) para task '{taskData.taskName}'.");
     }
 
     public void ClearHints()
@@ -39,6 +65,14 @@ public class TaskHintsPanelUI : MonoBehaviour
         }
 
         spawnedLines.Clear();
+
+        if (hintsContainer == null)
+            return;
+
+        for (int i = hintsContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(hintsContainer.GetChild(i).gameObject);
+        }
     }
 
     private Color GetColorBySkill(EmployeeSkillType skillType)

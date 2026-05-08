@@ -7,11 +7,21 @@ public class TaskHintLineUI : MonoBehaviour
 
     public void Setup(TaskHintLine data, Color highlightColor)
     {
+        if (hintText == null)
+        {
+            Debug.LogWarning("[TaskHintLineUI] hintText não está configurado no prefab.");
+            return;
+        }
+
+        if (data == null)
+        {
+            hintText.text = "";
+            return;
+        }
+
         string colorHex = ColorUtility.ToHtmlStringRGB(highlightColor);
 
-        string finalText =
+        hintText.text =
             $"• {data.prefixText}<color=#{colorHex}><b>{data.highlightedText}</b></color>{data.suffixText}";
-
-        hintText.text = finalText;
     }
 }

@@ -20,8 +20,38 @@ public class TaskInstance
 
     public float chancePercent;
     public bool isCritical;
+    public bool hasRolledResult;
+    public bool wasSuccessful;
+    public float rolledValue = -1f;
 
     private const int MaxTeamAttributeValue = 10;
+
+    public void CalculateAndStoreSuccessChance()
+    {
+        chancePercent = TaskSuccessCalculator.CalculateChancePercent(this);
+        isCritical = TaskSuccessCalculator.IsCritical(chancePercent);
+    }
+
+    public void ResetStoredResult()
+    {
+        chancePercent = 0f;
+        isCritical = false;
+        hasRolledResult = false;
+        wasSuccessful = false;
+        rolledValue = -1f;
+    }
+
+    public bool RollSuccessIfNeeded()
+    {
+        if (hasRolledResult)
+            return wasSuccessful;
+
+        rolledValue = Random.Range(0f, 100f);
+        wasSuccessful = isCritical || rolledValue <= chancePercent;
+        hasRolledResult = true;
+
+        return wasSuccessful;
+    }
 
     public TaskInstance(TaskData data)
     {
@@ -30,6 +60,8 @@ public class TaskInstance
 
         remainingExpirationTime = data != null ? data.expirationTime : 0f;
         remainingExecutionTime = data != null ? data.executionTime : 0f;
+
+        ResetStoredResult();
     }
 
     public bool CanExpire()
@@ -60,6 +92,7 @@ public class TaskInstance
             assignedEmployees.AddRange(employees);
 
         RecalculateTeamAttributes();
+        ResetStoredResult();
     }
 
     public void RecalculateTeamAttributes()

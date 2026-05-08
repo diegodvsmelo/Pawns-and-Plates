@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
   m_Name: Clean Tables
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
-  taskName: LIMPAR MESAS
-  description: RETIRAR PRATOS, LIMPAR E ORGANIZAR MESA
+  taskName: Clean Table
+  description: Remove plates, clean and organize the table
   taskType: 0
   outcomeFlow: 0
   maxSlots: 3
@@ -21,10 +21,19 @@ MonoBehaviour:
   executionTime: 5
   difficultyPoints: 60
   requirements:
-  - skillType: 0
-    weight: 70
-  - skillType: 0
-    weight: 30
+  - skillType: 2
+    requiredValue: 5
+  - skillType: 3
+    requiredValue: 3
+  taskHints:
+  - prefixText: 'Don''t forget to '
+    highlightedText: scrub
+    suffixText: ' it well'
+    relatedSkill: 2
+  - prefixText: 'You need to '
+    highlightedText: hurry up a bit
+    suffixText: before the next client comes
+    relatedSkill: 3
   staminaCost: 20
   moneyReward: 0
   reputationReward: 10

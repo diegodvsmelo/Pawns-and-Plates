@@ -31,7 +31,7 @@ public class TaskData : ScriptableObject
     [Min(0f)] public float executionTime = 5f;
 
     [Header("Difficulty")]
-    [Min(1f)] public float difficultyPoints = 5f;
+    [Min(1f)] public float difficultyPoints = 5f; //para uso futuro em recompensa/spawntier ou outra mecanica TODO
     public List<TaskRequirement> requirements = new();
 
     public List<TaskHintLine> taskHints = new List<TaskHintLine>();

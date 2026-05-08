@@ -7,6 +7,6 @@ public class TaskRequirement
     [Header("Skill")]
     public EmployeeSkillType skillType;
 
-    [Header("Weight")]
-    [Min(0f)] public float weight = 1f;
+    [Header("Required Value")]
+    [Range(1, 10)] public int requiredValue = 5;
 }
