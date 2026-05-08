@@ -244,13 +244,13 @@ Implemented / prototyped:
 
 ### Phase 3 — Employee Availability and Rest
 
-- [ ] Prevent unavailable or exhausted employees from being assigned
-- [ ] Mark assigned employees as occupied
-- [ ] Prevent occupied employees from appearing as available
-- [ ] Release employees only after result collection
-- [ ] Add manual rest command
-- [ ] Add passive stamina recovery
-- [ ] Add forced full rest at zero stamina
+- [x] Prevent unavailable or exhausted employees from being assigned
+- [x] Mark assigned employees as occupied
+- [x] Prevent occupied employees from appearing as available
+- [x] Release employees only after result collection
+- [x] Add manual rest command
+- [x] Add passive stamina recovery
+- [x] Add forced full rest at zero stamina
 
 ### Phase 4 — Order Flow
 

@@ -7,8 +7,9 @@ public class EmployeeRuntimeManager : MonoBehaviour
     [Header("Employees To Manage")]
     [SerializeField] private List<EmployeeData> sessionEmployees = new();
 
-    [Header("Rest Recovery")]
-    [SerializeField] private float restingStaminaRecoveryPerSecond = 5f;
+    [Header("Stamina Recovery")]
+    [SerializeField] private float passiveAvailableRecoveryPerSecond = 1f;
+    [SerializeField] private float restingRecoveryPerSecond = 5f;
 
     private readonly HashSet<EmployeeData> uniqueEmployees = new();
 
@@ -20,7 +21,10 @@ public class EmployeeRuntimeManager : MonoBehaviour
 
     private void Update()
     {
-        TickRestRecovery();
+        if (ShouldPauseRecovery())
+            return;
+
+        TickRecovery();
     }
 
     private void BuildUniqueList()
@@ -48,17 +52,23 @@ public class EmployeeRuntimeManager : MonoBehaviour
         }
     }
 
-    private void TickRestRecovery()
+    private bool ShouldPauseRecovery()
     {
-        if (restingStaminaRecoveryPerSecond <= 0f)
-            return;
+        if (GameManager.Instance != null && GameManager.Instance.isGamePaused)
+            return true;
 
+        return false;
+    }
+
+    private void TickRecovery()
+    {
         foreach (EmployeeData employee in uniqueEmployees)
         {
             if (employee == null)
                 continue;
 
-            employee.TickRestRecovery(restingStaminaRecoveryPerSecond, Time.deltaTime);
+            employee.TickPassiveRecovery(passiveAvailableRecoveryPerSecond, Time.deltaTime);
+            employee.TickRestRecovery(restingRecoveryPerSecond, Time.deltaTime);
         }
     }
 }

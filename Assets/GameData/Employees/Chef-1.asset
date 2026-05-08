@@ -19,10 +19,10 @@ MonoBehaviour:
   operationalSkill: 2
   agility: 2
   maxStamina: 200
-  currentStamina: 124
-  availabilityState: 2
+  currentStamina: 7
+  availabilityState: 0
   currentLevel: 1
-  currentXP: 75
+  currentXP: 0
   skillPoints: 0
   hasTrait: 0
   traitName: 
@@ -30,8 +30,8 @@ MonoBehaviour:
   statusIconB: {fileID: 0}
   baseSalary: 2
   resetRuntimeStateOnSessionStart: 1
-  startSessionWithFullStamina: 1
-  sessionStartStamina: 100
+  startSessionWithFullStamina: 0
+  sessionStartStamina: 1
   sessionStartLevel: 1
   sessionStartXP: 0
   sessionStartSkillPoints: 0

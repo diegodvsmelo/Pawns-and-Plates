@@ -59,6 +59,7 @@ public class EmployeeData : ScriptableObject
     [SerializeField] private EmployeeAvailabilityState sessionStartAvailability = EmployeeAvailabilityState.Available;
 
     [NonSerialized] private float restingRecoveryBuffer;
+    [NonSerialized] private float passiveRecoveryBuffer;
 
     private void OnValidate()
     {
@@ -123,6 +124,8 @@ public class EmployeeData : ScriptableObject
             availabilityState = EmployeeAvailabilityState.Available;
 
         restingRecoveryBuffer = 0f;
+        passiveRecoveryBuffer = 0f;
+
         NotifyDataChanged();
     }
 
@@ -270,6 +273,33 @@ public class EmployeeData : ScriptableObject
 
         if (currentStamina >= maxStamina && availabilityState == EmployeeAvailabilityState.Resting)
             availabilityState = EmployeeAvailabilityState.Available;
+
+        NotifyDataChanged();
+    }
+
+    public void TickPassiveRecovery(float staminaPerSecond, float deltaTime)
+    {
+        if (!IsAvailable())
+            return;
+
+        if (staminaPerSecond <= 0f || deltaTime <= 0f)
+            return;
+
+        if (currentStamina >= maxStamina)
+        {
+            currentStamina = maxStamina;
+            return;
+        }
+
+        passiveRecoveryBuffer += staminaPerSecond * deltaTime;
+
+        int recoveredWholePoints = Mathf.FloorToInt(passiveRecoveryBuffer);
+
+        if (recoveredWholePoints <= 0)
+            return;
+
+        passiveRecoveryBuffer -= recoveredWholePoints;
+        currentStamina = Mathf.Clamp(currentStamina + recoveredWholePoints, 0, maxStamina);
 
         NotifyDataChanged();
     }
