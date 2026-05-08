@@ -71,10 +71,7 @@ public class TaskPin : MonoBehaviour
         if (Instance == null || data == null)
             return;
 
-        if (isPaused)
-            return;
-
-        if (GameManager.Instance != null && GameManager.Instance.isGamePaused)
+        if (ShouldPauseTimer())
             return;
 
         if (Instance.state == TaskState.Available)
@@ -87,6 +84,20 @@ public class TaskPin : MonoBehaviour
         }
 
         UpdateTimerVisual();
+    }
+
+    private bool ShouldPauseTimer()
+    {
+        if (isPaused)
+            return true;
+
+        if (GameManager.Instance != null && GameManager.Instance.isGamePaused)
+            return true;
+
+        if (TaskSpawner.IsResultPopupOpenGlobally)
+            return true;
+
+        return false;
     }
 
     private void SetupSlider()
@@ -190,15 +201,6 @@ public class TaskPin : MonoBehaviour
         }
     }
 
-    private void UpdateFillVisibility()
-    {
-        if (timerFillImage == null || Instance == null)
-            return;
-
-        Color color = timerFillImage.color;
-        color.a = Instance.state == TaskState.ReadyToCollect ? 0f : 1f;
-        timerFillImage.color = color;
-    }
     private void RefreshVisualState()
     {
         if (Instance == null)
@@ -241,7 +243,18 @@ public class TaskPin : MonoBehaviour
             else
                 stateText.text = "";
         }
+
         UpdateFillVisibility();
+    }
+
+    private void UpdateFillVisibility()
+    {
+        if (timerFillImage == null || Instance == null)
+            return;
+
+        Color color = timerFillImage.color;
+        color.a = Instance.state == TaskState.ReadyToCollect ? 0f : 1f;
+        timerFillImage.color = color;
     }
 
     private void UpdateTimerVisual()
@@ -250,14 +263,10 @@ public class TaskPin : MonoBehaviour
             return;
 
         if (timerSlider != null)
-        {
             timerSlider.value = GetTimerNormalizedValue();
-        }
 
         if (timerText != null)
-        {
             timerText.text = GetTimerText();
-        }
     }
 
     private float GetTimerNormalizedValue()
@@ -301,9 +310,7 @@ public class TaskPin : MonoBehaviour
         }
 
         if (Instance.state == TaskState.InProgress)
-        {
             return Mathf.CeilToInt(Instance.remainingExecutionTime).ToString();
-        }
 
         if (Instance.state == TaskState.ReadyToCollect)
             return "Pronto";

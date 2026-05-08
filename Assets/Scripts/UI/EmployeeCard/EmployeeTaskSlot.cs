@@ -39,7 +39,10 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler, IPointerClickHandle
 
     public bool TryReceiveCardByClick(EmployeeCardUI card)
     {
-        if (card == null)
+        if (card == null || card.Data == null)
+            return false;
+
+        if (!card.Data.CanBeAssignedToTask())
             return false;
 
         EmployeeCardDraggable draggable = card.GetComponent<EmployeeCardDraggable>();
@@ -52,7 +55,13 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler, IPointerClickHandle
 
     private bool TryReceiveCard(EmployeeCardDraggable incomingDraggable, bool animate)
     {
+        if (incomingDraggable == null || incomingDraggable.EmployeeCardUI == null)
+            return false;
+
         EmployeeCardUI incomingCard = incomingDraggable.EmployeeCardUI;
+
+        if (incomingCard.Data == null || !incomingCard.Data.CanBeAssignedToTask())
+            return false;
 
         ResolveSource(
             incomingDraggable,
@@ -142,6 +151,9 @@ public class EmployeeTaskSlot : MonoBehaviour, IDropHandler, IPointerClickHandle
     private void AssignCardToThisSlot(EmployeeCardDraggable draggable, float animationDuration, bool notify)
     {
         if (draggable == null || draggable.EmployeeCardUI == null)
+            return;
+
+        if (draggable.EmployeeCardUI.Data == null || !draggable.EmployeeCardUI.Data.CanBeAssignedToTask())
             return;
 
         CurrentCard = draggable.EmployeeCardUI;

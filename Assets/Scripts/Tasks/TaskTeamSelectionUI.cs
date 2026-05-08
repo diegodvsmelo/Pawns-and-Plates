@@ -10,6 +10,9 @@ public class TaskTeamSelectionUI : MonoBehaviour
     [Header("Root")]
     [SerializeField] private GameObject elements;
 
+    [Header("External UI")]
+    [SerializeField] private GameObject compactSidebarRoot;
+
     [Header("Task Info")]
     [SerializeField] private TextMeshProUGUI taskNameText;
     [SerializeField] private TextMeshProUGUI taskDescriptionText;
@@ -20,6 +23,9 @@ public class TaskTeamSelectionUI : MonoBehaviour
     [Header("Expanded Employee Cards")]
     [SerializeField] private EmployeeCardListUI expandedCardListUI;
 
+    [Header("Employee Roster")]
+    [SerializeField] private EmployeeRosterManager employeeRosterManager;
+
     [Header("Selected Employees Slots")]
     [SerializeField] private Transform selectedEmployeeSlotsContainer;
     [SerializeField] private GameObject taskSlotEmployeePrefab;
@@ -27,9 +33,6 @@ public class TaskTeamSelectionUI : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button dispatchButton;
     [SerializeField] private Button closeButton;
-
-    [Header("Temporary Employee Source")]
-    [SerializeField] private List<EmployeeData> currentEmployees = new();
 
     [Header("Team Stats")]
     [SerializeField] private TeamStatsUI teamStatsUI;
@@ -58,9 +61,16 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
     public void SetEmployees(List<EmployeeData> employees)
     {
-        currentEmployees = employees != null
-            ? new List<EmployeeData>(employees)
-            : new List<EmployeeData>();
+        if (employeeRosterManager == null)
+            employeeRosterManager = EmployeeRosterManager.Instance;
+
+        if (employeeRosterManager == null)
+        {
+            Debug.LogWarning("[TaskTeamSelectionUI] EmployeeRosterManager não encontrado.");
+            return;
+        }
+
+        employeeRosterManager.SetEmployees(employees);
     }
 
     public void Open(TaskPin taskPin)
@@ -80,8 +90,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         currentTaskPin.PauseTimer();
 
-        if (elements != null)
-            elements.SetActive(true);
+        SetTaskSelectionVisible(true);
 
         UpdateTaskInfo();
         RefreshTaskHints();
@@ -92,7 +101,10 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
     public void OnEmployeeCardClicked(EmployeeCardUI card)
     {
-        if (card == null)
+        if (card == null || card.Data == null)
+            return;
+
+        if (!card.Data.CanBeAssignedToTask())
             return;
 
         if (clickSelectedCard == card)
@@ -106,8 +118,14 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
     public void OnTaskSlotClicked(EmployeeTaskSlot slot)
     {
-        if (slot == null || clickSelectedCard == null)
+        if (slot == null || clickSelectedCard == null || clickSelectedCard.Data == null)
             return;
+
+        if (!clickSelectedCard.Data.CanBeAssignedToTask())
+        {
+            SetClickSelectedCard(null);
+            return;
+        }
 
         bool placed = slot.TryReceiveCardByClick(clickSelectedCard);
 
@@ -164,22 +182,32 @@ public class TaskTeamSelectionUI : MonoBehaviour
             expandedCardListUI.Clear();
 
         ClearClickSelectedCard();
-
         ClearTaskHints();
+
         currentTaskPin = null;
         currentTaskData = null;
 
-        if (elements != null)
-            elements.SetActive(false);
+        SetTaskSelectionVisible(false);
 
-
-        GameManager.Instance.ResumeGame();
+        if (GameManager.Instance != null)
+            GameManager.Instance.ResumeGame();
     }
 
     private void HideInstant()
     {
+        SetTaskSelectionVisible(false);
+    }
+
+    private void SetTaskSelectionVisible(bool visible)
+    {
         if (elements != null)
-            elements.SetActive(false);
+            elements.SetActive(visible);
+
+        if (compactSidebarRoot != null)
+            compactSidebarRoot.SetActive(!visible);
+
+        if (!visible && employeeRosterManager != null)
+            employeeRosterManager.RefreshAllViews();
     }
 
     private void UpdateTaskInfo()
@@ -261,8 +289,20 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
     private void RebuildExpandedEmployeeCards()
     {
-        if (expandedCardListUI != null)
-            expandedCardListUI.Rebuild(currentEmployees);
+        if (expandedCardListUI == null)
+            return;
+
+        if (employeeRosterManager == null)
+            employeeRosterManager = EmployeeRosterManager.Instance;
+
+        if (employeeRosterManager == null)
+        {
+            Debug.LogWarning("[TaskTeamSelectionUI] EmployeeRosterManager não encontrado ao rebuildar cards expandidos.");
+            expandedCardListUI.Clear();
+            return;
+        }
+
+        expandedCardListUI.Rebuild(employeeRosterManager.GetCurrentEmployeesList());
     }
 
     private void OnDispatchButtonClicked()
@@ -280,10 +320,30 @@ public class TaskTeamSelectionUI : MonoBehaviour
             return;
         }
 
+        for (int i = 0; i < selectedEmployees.Count; i++)
+        {
+            EmployeeData employee = selectedEmployees[i];
+
+            if (employee == null || !employee.CanBeAssignedToTask())
+            {
+                Debug.LogWarning("Há funcionário indisponível, ocupado ou sem stamina na equipe selecionada.");
+                return;
+            }
+        }
+
         currentTaskPin.Instance.AssignEmployees(selectedEmployees);
         currentTaskPin.Instance.CalculateAndStoreSuccessChance();
 
         ConsumeSelectedEmployeesStamina(selectedEmployees, currentTaskData.staminaCost);
+
+        foreach (EmployeeData employee in selectedEmployees)
+        {
+            if (employee == null)
+                continue;
+
+            employee.SetOccupied();
+        }
+
         RefreshSelectedCards();
 
         Debug.Log(
@@ -309,8 +369,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
         currentTaskPin = null;
         currentTaskData = null;
 
-        if (elements != null)
-            elements.SetActive(false);
+        SetTaskSelectionVisible(false);
 
         if (GameManager.Instance != null)
             GameManager.Instance.ResumeGame();
@@ -326,8 +385,7 @@ public class TaskTeamSelectionUI : MonoBehaviour
             if (employee == null)
                 continue;
 
-            employee.currentStamina -= staminaCost;
-            employee.currentStamina = Mathf.Clamp(employee.currentStamina, 0, employee.maxStamina);
+            employee.ConsumeStamina(staminaCost);
         }
     }
 
@@ -343,6 +401,9 @@ public class TaskTeamSelectionUI : MonoBehaviour
 
         if (expandedCardListUI != null)
             expandedCardListUI.Refresh();
+
+        if (employeeRosterManager != null)
+            employeeRosterManager.RefreshAllViews();
     }
 
     private List<EmployeeData> GetSelectedEmployees()

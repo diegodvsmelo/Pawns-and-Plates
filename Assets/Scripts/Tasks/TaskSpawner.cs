@@ -30,13 +30,19 @@ public class TaskSpawner : MonoBehaviour
     public event Action OnSpawningStopped;
     public event Action<TaskPin> OnTaskSpawned;
     public event Action<TaskPin> OnTaskSelected;
-
     private bool isSpawningActive;
     private bool isResultPopupOpen;
     private GameManager gameManager;
     private Coroutine spawnCoroutine;
     private TaskPin pendingResolvedPin;
 
+    public static bool IsResultPopupOpenGlobally
+    {
+        get
+        {
+            return Instance != null && Instance.isResultPopupOpen;
+        }
+    }
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -48,6 +54,19 @@ public class TaskSpawner : MonoBehaviour
         Instance = this;
     }
 
+    private void ReleaseAssignedEmployees(TaskInstance instance)
+    {
+        if (instance == null || instance.assignedEmployees == null)
+            return;
+
+        foreach (EmployeeData employee in instance.assignedEmployees)
+        {
+            if (employee == null)
+                continue;
+
+            employee.SetAvailable();
+        }
+    }
     private void Start()
     {
         gameManager = GameManager.Instance;
@@ -297,6 +316,7 @@ public class TaskSpawner : MonoBehaviour
         }
         else
         {
+            ReleaseAssignedEmployees(taskPin.Instance);
             taskPin.CompleteAndDestroy();
         }
     }
@@ -318,6 +338,7 @@ public class TaskSpawner : MonoBehaviour
         }
         else
         {
+            ReleaseAssignedEmployees(taskPin.Instance);
             taskPin.CompleteAndDestroy();
         }
     }
@@ -328,6 +349,7 @@ public class TaskSpawner : MonoBehaviour
 
         if (pendingResolvedPin != null)
         {
+            ReleaseAssignedEmployees(pendingResolvedPin.Instance);
             pendingResolvedPin.CompleteAndDestroy();
             pendingResolvedPin = null;
         }
@@ -402,7 +424,7 @@ public class TaskSpawner : MonoBehaviour
             if (employee == null)
                 continue;
 
-            employee.currentXP += xpToGive;
+            employee.AddExperience(xpToGive);
         }
 
         Debug.Log(

@@ -1,8 +1,18 @@
+using System;
 using UnityEngine;
+
+public enum EmployeeAvailabilityState
+{
+    Available,
+    Occupied,
+    Resting
+}
 
 [CreateAssetMenu(fileName = "New Employee", menuName = "Restaurant/Employee")]
 public class EmployeeData : ScriptableObject
 {
+    public event Action OnDataChanged;
+
     [Header("Identity")]
     public string employeeName;
     public Sprite profilePicture;
@@ -16,6 +26,9 @@ public class EmployeeData : ScriptableObject
     [Range(0, 10)] public int agility;
     [Min(1)] public int maxStamina = 100;
     [Min(0)] public int currentStamina = 100;
+
+    [Header("Availability")]
+    public EmployeeAvailabilityState availabilityState = EmployeeAvailabilityState.Available;
 
     [Header("Progression")]
     [Min(1)] public int currentLevel = 1;
@@ -36,6 +49,17 @@ public class EmployeeData : ScriptableObject
     [Header("Contract Info")]
     [Min(0)] public int baseSalary = 1;
 
+    [Header("Session Defaults")]
+    [SerializeField] private bool resetRuntimeStateOnSessionStart = true;
+    [SerializeField] private bool startSessionWithFullStamina = true;
+    [SerializeField][Min(0)] private int sessionStartStamina = 100;
+    [SerializeField][Min(1)] private int sessionStartLevel = 1;
+    [SerializeField][Min(0)] private int sessionStartXP = 0;
+    [SerializeField][Min(0)] private int sessionStartSkillPoints = 0;
+    [SerializeField] private EmployeeAvailabilityState sessionStartAvailability = EmployeeAvailabilityState.Available;
+
+    [NonSerialized] private float restingRecoveryBuffer;
+
     private void OnValidate()
     {
         if (maxStamina < 1)
@@ -55,8 +79,51 @@ public class EmployeeData : ScriptableObject
         if (baseSalary < 0)
             baseSalary = 0;
 
+        if (sessionStartStamina < 0)
+            sessionStartStamina = 0;
+
+        sessionStartStamina = Mathf.Clamp(sessionStartStamina, 0, maxStamina);
+
+        if (sessionStartLevel < 1)
+            sessionStartLevel = 1;
+
+        if (sessionStartXP < 0)
+            sessionStartXP = 0;
+
+        if (sessionStartSkillPoints < 0)
+            sessionStartSkillPoints = 0;
+
         if (!hasTrait)
             traitName = "";
+
+        if (currentStamina <= 0 && availabilityState == EmployeeAvailabilityState.Available)
+            availabilityState = EmployeeAvailabilityState.Resting;
+    }
+
+    public bool ShouldResetRuntimeStateOnSessionStart()
+    {
+        return resetRuntimeStateOnSessionStart;
+    }
+
+    public void ResetRuntimeStateForSession()
+    {
+        currentLevel = Mathf.Max(1, sessionStartLevel);
+        currentXP = Mathf.Max(0, sessionStartXP);
+        skillPoints = Mathf.Max(0, sessionStartSkillPoints);
+
+        currentStamina = startSessionWithFullStamina
+            ? maxStamina
+            : Mathf.Clamp(sessionStartStamina, 0, maxStamina);
+
+        availabilityState = currentStamina <= 0
+            ? EmployeeAvailabilityState.Resting
+            : sessionStartAvailability;
+
+        if (availabilityState == EmployeeAvailabilityState.Occupied)
+            availabilityState = EmployeeAvailabilityState.Available;
+
+        restingRecoveryBuffer = 0f;
+        NotifyDataChanged();
     }
 
     public bool HasUnspentSkillPoints()
@@ -105,5 +172,145 @@ public class EmployeeData : ScriptableObject
             return 0f;
 
         return Mathf.Clamp01((float)currentXP / xpToNextLevel);
+    }
+
+    public void AddExperience(int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        currentXP += amount;
+
+        while (currentXP >= GetXpToNextLevel())
+        {
+            currentXP -= GetXpToNextLevel();
+            currentLevel++;
+            skillPoints++;
+        }
+
+        currentXP = Mathf.Max(0, currentXP);
+        NotifyDataChanged();
+    }
+
+    public void SetOccupied()
+    {
+        if (availabilityState == EmployeeAvailabilityState.Occupied)
+            return;
+
+        availabilityState = EmployeeAvailabilityState.Occupied;
+        NotifyDataChanged();
+    }
+
+    public void SetAvailable()
+    {
+        if (currentStamina <= 0)
+        {
+            SetResting();
+            return;
+        }
+
+        if (availabilityState == EmployeeAvailabilityState.Available)
+            return;
+
+        availabilityState = EmployeeAvailabilityState.Available;
+        NotifyDataChanged();
+    }
+
+    public void SetResting()
+    {
+        if (availabilityState == EmployeeAvailabilityState.Resting)
+            return;
+
+        availabilityState = EmployeeAvailabilityState.Resting;
+        restingRecoveryBuffer = 0f;
+        NotifyDataChanged();
+    }
+
+    public bool CanBeAssignedToTask()
+    {
+        return availabilityState == EmployeeAvailabilityState.Available && currentStamina > 0;
+    }
+
+    public bool IsAvailable()
+    {
+        return availabilityState == EmployeeAvailabilityState.Available;
+    }
+
+    public bool IsOccupied()
+    {
+        return availabilityState == EmployeeAvailabilityState.Occupied;
+    }
+
+    public bool IsResting()
+    {
+        return availabilityState == EmployeeAvailabilityState.Resting;
+    }
+
+    public void ConsumeStamina(int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        currentStamina -= amount;
+        currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
+
+        if (currentStamina <= 0)
+            SetResting();
+        else
+            NotifyDataChanged();
+    }
+
+    public void RecoverStamina(int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        currentStamina += amount;
+        currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
+
+        if (currentStamina >= maxStamina && availabilityState == EmployeeAvailabilityState.Resting)
+            availabilityState = EmployeeAvailabilityState.Available;
+
+        NotifyDataChanged();
+    }
+
+    public void TickRestRecovery(float staminaPerSecond, float deltaTime)
+    {
+        if (!IsResting())
+            return;
+
+        if (staminaPerSecond <= 0f || deltaTime <= 0f)
+            return;
+
+        if (currentStamina >= maxStamina)
+        {
+            currentStamina = maxStamina;
+            SetAvailable();
+            return;
+        }
+
+        restingRecoveryBuffer += staminaPerSecond * deltaTime;
+
+        int recoveredWholePoints = Mathf.FloorToInt(restingRecoveryBuffer);
+
+        if (recoveredWholePoints <= 0)
+            return;
+
+        restingRecoveryBuffer -= recoveredWholePoints;
+        currentStamina = Mathf.Clamp(currentStamina + recoveredWholePoints, 0, maxStamina);
+
+        if (currentStamina >= maxStamina)
+        {
+            currentStamina = maxStamina;
+            SetAvailable();
+            return;
+        }
+
+        NotifyDataChanged();
+    }
+
+    public void NotifyDataChanged()
+    {
+        OnDataChanged?.Invoke();
     }
 }

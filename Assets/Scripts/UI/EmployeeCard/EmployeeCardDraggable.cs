@@ -56,6 +56,9 @@ public class EmployeeCardDraggable : MonoBehaviour, IBeginDragHandler, IDragHand
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (!CanInteractWithCard())
+            return;
+
         if (dragLayer == null)
         {
             Debug.LogWarning("EmployeeCardDraggable: DragLayer não encontrado.");
@@ -103,6 +106,9 @@ public class EmployeeCardDraggable : MonoBehaviour, IBeginDragHandler, IDragHand
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (!IsDragging)
+            return;
+
         IsDragging = false;
 
         canvasGroup.blocksRaycasts = true;
@@ -209,5 +215,13 @@ public class EmployeeCardDraggable : MonoBehaviour, IBeginDragHandler, IDragHand
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
         rectTransform.anchoredPosition = Vector2.zero;
+    }
+
+    private bool CanInteractWithCard()
+    {
+        if (EmployeeCardUI == null || EmployeeCardUI.Data == null)
+            return false;
+
+        return EmployeeCardUI.Data.CanBeAssignedToTask();
     }
 }

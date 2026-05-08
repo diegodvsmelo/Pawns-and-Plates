@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StaffSidebarUI : MonoBehaviour
 {
@@ -41,6 +42,8 @@ public class StaffSidebarUI : MonoBehaviour
             if (card != null)
                 card.Refresh();
         }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(cardsContainer as RectTransform);
     }
 
     private void Clear()

@@ -19,10 +19,11 @@ MonoBehaviour:
   operationalSkill: 4
   agility: 3
   maxStamina: 100
-  currentStamina: 100
-  currentLevel: 1
-  currentXP: 99
-  skillPoints: 0
+  currentStamina: 60
+  availabilityState: 0
+  currentLevel: 2
+  currentXP: 145
+  skillPoints: 1
   hasTrait: 0
   traitName: 
   statusIconA: {fileID: 0}

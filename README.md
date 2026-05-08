@@ -232,13 +232,13 @@ Implemented / prototyped:
 
 ### Phase 2 — Task Resolution
 
-- [ ] Calculate task success chance from TaskData requirements
-- [ ] Display estimated success chance in Task Team Selection
-- [ ] Store calculated chance in TaskInstance
-- [ ] Roll success/failure when collecting result
-- [ ] Apply money reward on success
-- [ ] Apply reputation reward or penalty
-- [ ] Apply XP to assigned employees
+- [x] Calculate task success chance from TaskData requirements
+- [x] Display final success chance in Task Result Popup
+- [x] Store calculated chance in TaskInstance
+- [x] Roll success/failure when collecting result
+- [x] Apply money reward on success
+- [x] Apply reputation reward or penalty
+- [x] Apply XP to assigned employees
 - [ ] Apply stamina cost at final intended timing
 - [ ] Add critical / 100% chance reward behavior
 
