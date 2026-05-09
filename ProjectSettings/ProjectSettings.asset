@@ -42,8 +42,8 @@ PlayerSettings:
   m_SplashScreenLogos: []
   m_VirtualRealitySplashScreen: {fileID: 0}
   m_HolographicTrackingLossScreen: {fileID: 0}
-  defaultScreenWidth: 1024
-  defaultScreenHeight: 768
+  defaultScreenWidth: 1600
+  defaultScreenHeight: 900
   defaultScreenWidthWeb: 960
   defaultScreenHeightWeb: 600
   m_StereoRenderingPath: 0
@@ -108,7 +108,7 @@ PlayerSettings:
   xboxEnableFitness: 0
   visibleInBackground: 1
   allowFullscreenSwitch: 1
-  fullscreenMode: 1
+  fullscreenMode: 3
   xboxSpeechDB: 0
   xboxEnableHeadOrientation: 0
   xboxEnableGuest: 0
@@ -844,8 +844,8 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: "Prot\xF3tipo Displate"
-  metroPackageVersion: 
+  metroPackageName: 
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -853,7 +853,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: "Prot\xF3tipo Displate"
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: "Prot\xF3tipo Displate"
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
@@ -925,7 +925,7 @@ PlayerSettings:
   cloudProjectId: a8e83f85-52d7-442f-9bd1-7bd54c6095f6
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Protótipo Displate 2026-04-30_16-13-08
+  projectName: "Prot\xF3tipo Displate 2026-04-30_16-13-08"
   organizationId: diegodavis
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
