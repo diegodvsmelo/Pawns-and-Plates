@@ -1861,7 +1861,7 @@ MonoBehaviour:
   scrollAction: {fileID: 8699643004909462733, guid: 5f7b0f64eb4272341b52c5be72c08853, type: 3}
   dragSensitivity: 0.003
   zoomSpeed: 25
-  minZoom: 3
+  minZoom: 1
   maxZoom: 6
   boundsCenter: {x: -24, y: 19, z: -24}
   limitX: 6
@@ -6487,6 +6487,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9170722914293696862, guid: 69b53c4ade8def74bb7f5fe8ebc02efe, type: 3}
   m_PrefabInstance: {fileID: 8327002486270350372}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1349516539 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8581393323506698798, guid: 69b53c4ade8def74bb7f5fe8ebc02efe, type: 3}
+  m_PrefabInstance: {fileID: 8327002486270350372}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082de11032f284549961da9c193c1041, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TaskGeneratorStructure
 --- !u!1 &1364677432
 GameObject:
   m_ObjectHideFlags: 0
@@ -8979,9 +8990,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TaskSpawner
   pinPrefab: {fileID: 344980891104134225, guid: 40414e13917c87743b02ef0536927aec, type: 3}
   taskGenerators:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1349516539}
   - {fileID: 1584894746}
   possibleTasks:
   - {fileID: 11400000, guid: 8b9f263b5fefd6b43bf335e3f5cdbfc8, type: 2}

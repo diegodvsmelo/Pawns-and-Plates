@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
   taskName: Clean Table
   description: Remove plates, clean and organize the table
-  taskType: 0
-  outcomeFlow: 0
+  taskType: 2
+  outcomeFlow: 4
   canSpawnRandomly: 0
   maxSlots: 1
   expirationTime: 30
