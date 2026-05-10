@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
+  m_Name: Take_Order_Table
+  m_EditorClassIdentifier: Assembly-CSharp::TaskData
+  taskName: Take Order on Table
+  description: 
+  taskType: 0
+  outcomeFlow: 1
+  canSpawnRandomly: 1
+  maxSlots: 1
+  expirationTime: 20
+  executionTime: 5
+  difficultyPoints: 5
+  requirements:
+  - skillType: 1
+    requiredValue: 4
+  - skillType: 3
+    requiredValue: 2
+  taskHints:
+  - prefixText: 'Be '
+    highlightedText: polite
+    suffixText: ' ask if their fries are medium or large.'
+    relatedSkill: 1
+  - prefixText: 'Don''t take so '
+    highlightedText: long
+    suffixText: ' to write down the order.'
+    relatedSkill: 3
+  followUpCookingTask: {fileID: 11400000, guid: 1c9a71da5a6615c4eaeaaa5e2cc0f022, type: 2}
+  possibleGeneratedOrders:
+  - {fileID: 11400000, guid: 41b4fa37785b4ab43b7e3b0520bae5f6, type: 2}
+  staminaCost: 10
+  moneyReward: 10
+  reputationReward: 5
+  xpOnSuccess: 10
+  reputationPenalty: 8
+  xpOnFailure: 3
+  xpOnCritical: 15
+  bonusMoneyOnCritical: 5
+  bonusReputationOnCritical: 5
+  taskIcon: {fileID: 0}
+  taskColor: {r: 1, g: 1, b: 1, a: 1}

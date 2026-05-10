@@ -49,6 +49,10 @@ public class TaskGeneratorStructure : MonoBehaviour
 
         if (taskType == TaskType.Service)
         {
+            if (generatorType == TaskGeneratorType.Table &&
+                currentState == StructureState.WaitingForCooking)
+                return false;
+
             return generatorType == TaskGeneratorType.Cashier ||
                    generatorType == TaskGeneratorType.Table;
         }
@@ -62,9 +66,7 @@ public class TaskGeneratorStructure : MonoBehaviour
         }
 
         if (taskType == TaskType.Operational)
-        {
             return true;
-        }
 
         return false;
     }

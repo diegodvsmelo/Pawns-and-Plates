@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
-  m_Name: Clean Tables
+  m_Name: Clean_Tables
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
   taskName: Clean Table
   description: Remove plates, clean and organize the table
   taskType: 0
   outcomeFlow: 0
+  canSpawnRandomly: 0
   maxSlots: 3
   expirationTime: 20
   executionTime: 5
@@ -34,6 +35,8 @@ MonoBehaviour:
     highlightedText: hurry up a bit
     suffixText: before the next client comes
     relatedSkill: 3
+  followUpCookingTask: {fileID: 0}
+  possibleGeneratedOrders: []
   staminaCost: 20
   moneyReward: 0
   reputationReward: 10

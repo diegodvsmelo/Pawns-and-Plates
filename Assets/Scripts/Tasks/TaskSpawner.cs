@@ -30,8 +30,10 @@ public class TaskSpawner : MonoBehaviour
     public event Action OnSpawningStopped;
     public event Action<TaskPin> OnTaskSpawned;
     public event Action<TaskPin> OnTaskSelected;
+
     private bool isSpawningActive;
     private bool isResultPopupOpen;
+    private bool isBoundToTaskFlowManager;
     private GameManager gameManager;
     private Coroutine spawnCoroutine;
     private TaskPin pendingResolvedPin;
@@ -43,6 +45,7 @@ public class TaskSpawner : MonoBehaviour
             return Instance != null && Instance.isResultPopupOpen;
         }
     }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -52,6 +55,46 @@ public class TaskSpawner : MonoBehaviour
         }
 
         Instance = this;
+    }
+
+    private void OnEnable()
+    {
+        TryBindTaskFlowManagerEvents();
+    }
+
+    private void OnDisable()
+    {
+        UnbindTaskFlowManagerEvents();
+    }
+
+    private void Start()
+    {
+        gameManager = GameManager.Instance;
+        TryBindTaskFlowManagerEvents();
+        StartSpawning();
+    }
+
+    private void TryBindTaskFlowManagerEvents()
+    {
+        if (isBoundToTaskFlowManager)
+            return;
+
+        if (TaskFlowManager.Instance == null)
+            return;
+
+        TaskFlowManager.Instance.OnOrderGenerationRequested += HandleOrderGenerationRequested;
+        isBoundToTaskFlowManager = true;
+    }
+
+    private void UnbindTaskFlowManagerEvents()
+    {
+        if (!isBoundToTaskFlowManager)
+            return;
+
+        if (TaskFlowManager.Instance != null)
+            TaskFlowManager.Instance.OnOrderGenerationRequested -= HandleOrderGenerationRequested;
+
+        isBoundToTaskFlowManager = false;
     }
 
     private void ReleaseAssignedEmployees(TaskInstance instance)
@@ -66,11 +109,6 @@ public class TaskSpawner : MonoBehaviour
 
             employee.SetAvailable();
         }
-    }
-    private void Start()
-    {
-        gameManager = GameManager.Instance;
-        StartSpawning();
     }
 
     public void StartSpawning()
@@ -127,33 +165,20 @@ public class TaskSpawner : MonoBehaviour
     private void SpawnRandomTaskOnStructure()
     {
         if (pinPrefab == null)
-        {
-            Debug.LogWarning("TaskSpawner está sem pinPrefab.");
             return;
-        }
 
         if (possibleTasks == null || possibleTasks.Count == 0)
-        {
-            Debug.LogWarning("TaskSpawner não possui possibleTasks.");
             return;
-        }
 
         if (taskGenerators == null || taskGenerators.Count == 0)
-        {
-            Debug.LogWarning("TaskSpawner não possui estruturas geradoras.");
             return;
-        }
 
         List<TaskSpawnOption> validOptions = GetValidSpawnOptions();
 
         if (validOptions.Count == 0)
-        {
-            Debug.Log("Nenhuma estrutura disponível para spawnar task no momento.");
             return;
-        }
 
         TaskSpawnOption chosenOption = validOptions[UnityEngine.Random.Range(0, validOptions.Count)];
-
         SpawnTaskOnStructure(chosenOption.taskData, chosenOption.structure);
     }
 
@@ -163,7 +188,7 @@ public class TaskSpawner : MonoBehaviour
 
         foreach (TaskData task in possibleTasks)
         {
-            if (task == null)
+            if (task == null || !task.canSpawnRandomly)
                 continue;
 
             foreach (TaskGeneratorStructure structure in taskGenerators)
@@ -179,6 +204,45 @@ public class TaskSpawner : MonoBehaviour
         return validOptions;
     }
 
+    public TaskPin SpawnSpecificTaskOnStructure(TaskData taskData, TaskGeneratorStructure structure)
+    {
+        return SpawnTaskOnStructure(taskData, structure);
+    }
+
+    public bool TrySpawnCookingTaskForOrder(RestaurantOrder order)
+    {
+        if (order == null || order.sourceData == null)
+            return false;
+
+        TaskData cookingTask = FindCookingTaskForOrder(order);
+
+        if (cookingTask == null)
+            return false;
+
+        TaskGeneratorStructure cookingStructure = FindFirstAvailableStructure(
+            order.requiredCookingStructure,
+            TaskType.Cooking
+        );
+
+        if (cookingStructure == null)
+            return false;
+
+        TaskPin cookingPin = SpawnSpecificTaskOnStructure(cookingTask, cookingStructure);
+
+        if (cookingPin == null)
+            return false;
+
+        order.cookingStructure = cookingStructure;
+
+        if (cookingPin.Instance != null)
+            cookingPin.Instance.SetLinkedOrder(order);
+
+        if (TaskFlowManager.Instance != null)
+            TaskFlowManager.Instance.RegisterOrder(cookingPin, order);
+
+        return true;
+    }
+
     private TaskPin SpawnTaskOnStructure(TaskData taskData, TaskGeneratorStructure structure)
     {
         if (taskData == null || structure == null)
@@ -188,10 +252,7 @@ public class TaskSpawner : MonoBehaviour
             return null;
 
         if (structure.PinContainer == null)
-        {
-            Debug.LogWarning($"Estrutura {structure.structureName} está sem PinContainer.");
             return null;
-        }
 
         GameObject newPin = Instantiate(pinPrefab, structure.PinContainer);
 
@@ -214,7 +275,6 @@ public class TaskSpawner : MonoBehaviour
 
         if (pinScript == null)
         {
-            Debug.LogWarning("Prefab de TaskPin não possui componente TaskPin.");
             Destroy(newPin);
             return null;
         }
@@ -231,9 +291,6 @@ public class TaskSpawner : MonoBehaviour
         binding.Setup(structure, pinScript);
 
         OnTaskSpawned?.Invoke(pinScript);
-
-        Debug.Log($"Spawnou task '{taskData.taskName}' em '{structure.structureName}'.");
-
         return pinScript;
     }
 
@@ -247,26 +304,17 @@ public class TaskSpawner : MonoBehaviour
 
         if (taskPin.CurrentState == TaskState.Available)
         {
-            Debug.Log($"Abrindo seleção de equipe para task: {taskPin.data.taskName}");
-
             if (taskTeamSelectionUI != null)
             {
                 taskTeamSelectionUI.Open(taskPin);
                 OnTaskSelected?.Invoke(taskPin);
-            }
-            else
-            {
-                Debug.LogWarning("TaskSpawner está sem referência para TaskTeamSelectionUI.");
             }
 
             return;
         }
 
         if (taskPin.CurrentState == TaskState.InProgress)
-        {
-            Debug.Log($"Task em andamento: {taskPin.data.taskName}. Aguarde terminar.");
             return;
-        }
 
         if (taskPin.CurrentState == TaskState.ReadyToCollect)
         {
@@ -275,10 +323,7 @@ public class TaskSpawner : MonoBehaviour
         }
 
         if (taskPin.CurrentState == TaskState.Expired)
-        {
             CollectExpiredTask(taskPin);
-            return;
-        }
     }
 
     private void CollectFinishedTask(TaskPin taskPin)
@@ -293,20 +338,15 @@ public class TaskSpawner : MonoBehaviour
 
         bool wasSuccessful = instance.RollSuccessIfNeeded();
 
-        Debug.Log(
-            $"Task '{taskPin.data.taskName}' coletada. " +
-            $"Chance: {instance.chancePercent:F1}% | " +
-            $"Roll: {instance.rolledValue:F1} | " +
-            $"Success: {wasSuccessful} | " +
-            $"Critical: {instance.isCritical}"
-        );
-
         if (wasSuccessful)
             ApplySuccessReward(instance);
         else
             ApplyFailurePenalty(instance);
 
         ApplyTaskExperience(instance, wasSuccessful);
+
+        if (TaskFlowManager.Instance != null)
+            TaskFlowManager.Instance.ResolveTask(taskPin, wasSuccessful);
 
         if (taskResultPopupUI != null)
         {
@@ -326,9 +366,10 @@ public class TaskSpawner : MonoBehaviour
         if (taskPin == null || taskPin.Instance == null || taskPin.data == null)
             return;
 
-        Debug.Log($"Task expirada coletada: {taskPin.data.taskName}. Aplicando penalidade.");
-
         ApplyFailurePenalty(taskPin.Instance);
+
+        if (TaskFlowManager.Instance != null)
+            TaskFlowManager.Instance.ResolveExpiredTask(taskPin);
 
         if (taskResultPopupUI != null)
         {
@@ -350,8 +391,21 @@ public class TaskSpawner : MonoBehaviour
         if (pendingResolvedPin != null)
         {
             ReleaseAssignedEmployees(pendingResolvedPin.Instance);
-            pendingResolvedPin.CompleteAndDestroy();
+
+            TaskGeneratorStructure structure = pendingResolvedPin.GetComponentInParent<TaskGeneratorStructure>();
+            TaskGeneratorType freedType = structure != null ? structure.generatorType : TaskGeneratorType.GenericOperational;
+
+            // Libera explicitamente o slot da estrutura ANTES de tentar puxar pedido pendente
+            if (structure != null)
+                structure.ClearPin(pendingResolvedPin);
+
+            TaskPin resolvedPin = pendingResolvedPin;
             pendingResolvedPin = null;
+
+            resolvedPin.CompleteAndDestroy();
+
+            if (TaskFlowManager.Instance != null)
+                TaskFlowManager.Instance.TryDispatchPendingOrders(freedType);
         }
     }
 
@@ -363,10 +417,7 @@ public class TaskSpawner : MonoBehaviour
         ResourceManager resourceManager = ResourceManager.Instance;
 
         if (resourceManager == null)
-        {
-            Debug.LogWarning("Não foi possível aplicar recompensa: ResourceManager não encontrado.");
             return;
-        }
 
         bool isCritical = instance.isCritical;
 
@@ -381,11 +432,6 @@ public class TaskSpawner : MonoBehaviour
 
         if (DayCycleManager.Instance != null && moneyReward > 0)
             DayCycleManager.Instance.AddDailyEarnings(moneyReward);
-
-        Debug.Log(
-            $"Recompensa aplicada: +${moneyReward}, +{reputationReward} reputação. " +
-            $"Critical: {isCritical}"
-        );
     }
 
     private void ApplyFailurePenalty(TaskInstance instance)
@@ -396,15 +442,10 @@ public class TaskSpawner : MonoBehaviour
         ResourceManager resourceManager = ResourceManager.Instance;
 
         if (resourceManager == null)
-        {
-            Debug.LogWarning("Não foi possível aplicar penalidade: ResourceManager não encontrado.");
             return;
-        }
 
         if (instance.data.reputationPenalty != 0)
             resourceManager.ModifyReputation(-instance.data.reputationPenalty);
-
-        Debug.Log($"Penalidade aplicada: -{instance.data.reputationPenalty} reputação.");
     }
 
     private void ApplyTaskExperience(TaskInstance instance, bool wasSuccessful)
@@ -426,11 +467,104 @@ public class TaskSpawner : MonoBehaviour
 
             employee.AddExperience(xpToGive);
         }
+    }
 
-        Debug.Log(
-            $"XP aplicado aos funcionários da task '{instance.data.taskName}': " +
-            $"{xpToGive} XP para cada membro."
-        );
+    private void HandleOrderGenerationRequested(TaskPin serviceTaskPin, TaskGeneratorStructure originStructure)
+    {
+        if (serviceTaskPin == null || serviceTaskPin.data == null)
+            return;
+
+        TaskData serviceTaskData = serviceTaskPin.data;
+
+        if (serviceTaskData.followUpCookingTask == null)
+            return;
+
+        OrderRecipeData orderData = PickRandomGeneratedOrder(serviceTaskData);
+
+        if (orderData == null)
+            return;
+
+        bool serviceSuccess = serviceTaskPin.Instance != null && serviceTaskPin.Instance.wasSuccessful;
+        TaskGeneratorStructure cookingStructure = FindFirstAvailableStructure(orderData.requiredCookingStructure, TaskType.Cooking);
+
+        RestaurantOrder runtimeOrder = orderData.CreateRuntimeOrder(originStructure, cookingStructure, serviceSuccess);
+
+        if (cookingStructure == null)
+        {
+            if (TaskFlowManager.Instance != null)
+                TaskFlowManager.Instance.EnqueuePendingOrder(runtimeOrder);
+
+            return;
+        }
+
+        bool spawned = TrySpawnCookingTaskForOrder(runtimeOrder);
+
+        if (!spawned && TaskFlowManager.Instance != null)
+            TaskFlowManager.Instance.EnqueuePendingOrder(runtimeOrder);
+    }
+
+    private OrderRecipeData PickRandomGeneratedOrder(TaskData serviceTaskData)
+    {
+        if (serviceTaskData == null ||
+            serviceTaskData.possibleGeneratedOrders == null ||
+            serviceTaskData.possibleGeneratedOrders.Count == 0)
+        {
+            return null;
+        }
+
+        List<OrderRecipeData> validOrders = new();
+
+        foreach (OrderRecipeData order in serviceTaskData.possibleGeneratedOrders)
+        {
+            if (order != null)
+                validOrders.Add(order);
+        }
+
+        if (validOrders.Count == 0)
+            return null;
+
+        return validOrders[UnityEngine.Random.Range(0, validOrders.Count)];
+    }
+
+    private TaskGeneratorStructure FindFirstAvailableStructure(TaskGeneratorType generatorType, TaskType taskType)
+    {
+        foreach (TaskGeneratorStructure structure in taskGenerators)
+        {
+            if (structure == null)
+                continue;
+
+            if (structure.generatorType != generatorType)
+                continue;
+
+            if (!structure.CanReceiveTask(taskType))
+                continue;
+
+            return structure;
+        }
+
+        return null;
+    }
+
+    private TaskData FindCookingTaskForOrder(RestaurantOrder order)
+    {
+        if (order == null)
+            return null;
+
+        foreach (TaskData task in possibleTasks)
+        {
+            if (task == null)
+                continue;
+
+            if (task.taskType != TaskType.Cooking)
+                continue;
+
+            if (task.outcomeFlow != TaskOutcomeFlow.DeliverOrder)
+                continue;
+
+            return task;
+        }
+
+        return null;
     }
 
     private struct TaskSpawnOption

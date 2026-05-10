@@ -239,7 +239,7 @@ Implemented / prototyped:
 - [x] Apply money reward on success
 - [x] Apply reputation reward or penalty
 - [x] Apply XP to assigned employees
-- [ ] Apply stamina cost at final intended timing
+- [x] Apply stamina cost at final intended timing
 - [ ] Add critical / 100% chance reward behavior
 
 ### Phase 3 — Employee Availability and Rest
@@ -254,12 +254,12 @@ Implemented / prototyped:
 
 ### Phase 4 — Order Flow
 
-- [ ] Implement RestaurantOrder runtime object
-- [ ] Service task generates order
-- [ ] Order identifies required cooking structure
-- [ ] Cooking task spawns on correct structure
+- [x] Implement RestaurantOrder runtime object
+- [x] Service task generates order
+- [x] Order identifies required cooking structure
+- [x] Cooking task spawns on correct structure
 - [ ] Cooking task resolves order delivery
-- [ ] Table enters eating state
+- [x] Table enters eating state
 - [ ] Table generates cleaning task or new service request
 
 ### Phase 5 — Operational Flow

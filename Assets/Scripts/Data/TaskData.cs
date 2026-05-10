@@ -25,16 +25,24 @@ public class TaskData : ScriptableObject
     public TaskType taskType;
     public TaskOutcomeFlow outcomeFlow = TaskOutcomeFlow.None;
 
+    [Header("Spawn Rules")]
+    public bool canSpawnRandomly = true;
+
     [Header("Execution")]
     [Min(1)] public int maxSlots = 1;
     [Min(0f)] public float expirationTime = 20f;
     [Min(0f)] public float executionTime = 5f;
 
     [Header("Difficulty")]
-    [Min(1f)] public float difficultyPoints = 5f; //para uso futuro em recompensa/spawntier ou outra mecanica TODO
+    [Min(1f)] public float difficultyPoints = 5f;
     public List<TaskRequirement> requirements = new();
 
-    public List<TaskHintLine> taskHints = new List<TaskHintLine>();
+    [Header("Hints")]
+    public List<TaskHintLine> taskHints = new();
+
+    [Header("Order Flow")]
+    public TaskData followUpCookingTask;
+    public List<OrderRecipeData> possibleGeneratedOrders = new();
 
     [Header("Costs")]
     [Min(0)] public int staminaCost = 10;

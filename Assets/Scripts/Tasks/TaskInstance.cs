@@ -12,6 +12,9 @@ public class TaskInstance
 
     public List<EmployeeData> assignedEmployees = new();
 
+    [Header("Order Flow")]
+    public RestaurantOrder linkedOrder;
+
     [Header("Team Attributes")]
     public int teamCooking;
     public int teamService;
@@ -93,6 +96,16 @@ public class TaskInstance
 
         RecalculateTeamAttributes();
         ResetStoredResult();
+    }
+
+    public void SetLinkedOrder(RestaurantOrder order)
+    {
+        linkedOrder = order;
+    }
+
+    public void ClearLinkedOrder()
+    {
+        linkedOrder = null;
     }
 
     public void RecalculateTeamAttributes()

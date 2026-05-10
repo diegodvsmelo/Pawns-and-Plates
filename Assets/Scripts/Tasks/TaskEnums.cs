@@ -39,6 +39,7 @@ public enum StructureState
 {
     Available,
     Occupied,
+    WaitingForCooking,
     Dirty,
     Eating,
     Broken,

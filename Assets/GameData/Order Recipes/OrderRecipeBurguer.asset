@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 251f9e3af706def40972c5527a7a89bc, type: 3}
-  m_Name: atender_cliente_no_caixa
+  m_Name: OrderRecipeBurguer
   m_EditorClassIdentifier: Assembly-CSharp::OrderRecipeData
-  orderName: Atendimento no caixa
-  requiredCookingStructure: 0
+  orderName: Hamburguer
+  requiredCookingStructure: 3
   baseReward: 10
   reputationReward: 1
   cookingRequirement: 7

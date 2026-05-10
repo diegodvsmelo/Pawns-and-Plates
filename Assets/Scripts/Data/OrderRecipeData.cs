@@ -5,6 +5,7 @@ public class OrderRecipeData : ScriptableObject
 {
     [Header("Order Info")]
     public string orderName;
+    public Sprite orderIcon;
 
     [Header("Cooking Target")]
     public TaskGeneratorType requiredCookingStructure;
@@ -16,16 +17,15 @@ public class OrderRecipeData : ScriptableObject
     [Header("Difficulty")]
     public int cookingRequirement = 7;
 
-    public RestaurantOrder CreateRuntimeOrder(TaskGeneratorStructure origin, bool serviceSuccess)
+    [Header("Pending Queue")]
+    [Min(1f)] public float maxPendingWaitTime = 20f;
+    [Min(0)] public int pendingFailureReputationPenalty = 2;
+
+    public RestaurantOrder CreateRuntimeOrder(
+        TaskGeneratorStructure origin,
+        TaskGeneratorStructure cooking,
+        bool serviceSuccess)
     {
-        return new RestaurantOrder
-        {
-            orderName = orderName,
-            requiredCookingStructure = requiredCookingStructure,
-            baseReward = baseReward,
-            reputationReward = reputationReward,
-            originStructure = origin,
-            serviceWasSuccessful = serviceSuccess
-        };
+        return new RestaurantOrder(this, origin, cooking, serviceSuccess);
     }
 }
