@@ -17,10 +17,10 @@ MonoBehaviour:
   taskType: 0
   outcomeFlow: 0
   canSpawnRandomly: 0
-  maxSlots: 3
-  expirationTime: 20
-  executionTime: 5
-  difficultyPoints: 60
+  maxSlots: 1
+  expirationTime: 30
+  executionTime: 6
+  difficultyPoints: 6
   requirements:
   - skillType: 2
     requiredValue: 5

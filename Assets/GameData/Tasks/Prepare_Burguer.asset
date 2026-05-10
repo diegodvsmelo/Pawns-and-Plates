@@ -46,5 +46,5 @@ MonoBehaviour:
   xpOnCritical: 20
   bonusMoneyOnCritical: 0
   bonusReputationOnCritical: 10
-  taskIcon: {fileID: 0}
-  taskColor: {r: 0.72506726, g: 0.24527201, b: 0.24527201, a: 1}
+  taskIcon: {fileID: 21300000, guid: 5d25dde5db8626e48b03a48b1ca22d9b, type: 3}
+  taskColor: {r: 1, g: 1, b: 1, a: 1}

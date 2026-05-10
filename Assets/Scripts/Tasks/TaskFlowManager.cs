@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ public class TaskFlowManager : MonoBehaviour
 
     private readonly Dictionary<TaskPin, RestaurantOrder> ordersByTaskPin = new();
     private readonly List<PendingOrderTicket> pendingOrders = new();
+    private readonly Dictionary<TaskGeneratorStructure, Coroutine> activeEatingCoroutines = new();
 
     public IReadOnlyList<PendingOrderTicket> PendingOrders => pendingOrders;
 
@@ -189,8 +191,12 @@ public class TaskFlowManager : MonoBehaviour
         {
             case TaskOutcomeFlow.GenerateOrder:
                 Debug.Log("[TaskFlowManager] Service task expirou antes do atendimento. Cliente saiu sem pedir.");
+
                 if (originStructure != null && originStructure.CurrentState != StructureState.Eating)
+                {
+                    originStructure.ClearDeliveredOrderVisual();
                     originStructure.SetState(StructureState.Available);
+                }
                 break;
 
             case TaskOutcomeFlow.DeliverOrder:
@@ -226,6 +232,8 @@ public class TaskFlowManager : MonoBehaviour
                 order.originStructure.generatorType == TaskGeneratorType.Table)
             {
                 order.originStructure.SetState(StructureState.Eating);
+                order.originStructure.ShowDeliveredOrderVisual(order.sourceData);
+                StartEatingTimer(order.originStructure);
             }
 
             if (order.cookingStructure != null)
@@ -238,7 +246,10 @@ public class TaskFlowManager : MonoBehaviour
         }
 
         if (originStructure != null && originStructure.generatorType == TaskGeneratorType.Table)
+        {
             originStructure.SetState(StructureState.Eating);
+            StartEatingTimer(originStructure);
+        }
     }
 
     private void HandleFailedDelivery(TaskPin taskPin)
@@ -248,6 +259,7 @@ public class TaskFlowManager : MonoBehaviour
             if (order.originStructure != null &&
                 order.originStructure.generatorType == TaskGeneratorType.Table)
             {
+                order.originStructure.ClearDeliveredOrderVisual();
                 order.originStructure.SetState(StructureState.Available);
             }
 
@@ -271,6 +283,8 @@ public class TaskFlowManager : MonoBehaviour
         if (structure == null)
             return;
 
+        StopEatingTimer(structure);
+        structure.ClearDeliveredOrderVisual();
         structure.SetState(StructureState.Available);
     }
 
@@ -284,9 +298,6 @@ public class TaskFlowManager : MonoBehaviour
 
     private void TickPendingOrders()
     {
-        if (GameManager.Instance != null && GameManager.Instance.isGamePaused)
-            return;
-
         if (pendingOrders.Count == 0)
             return;
 
@@ -357,10 +368,62 @@ public class TaskFlowManager : MonoBehaviour
             order.originStructure.generatorType == TaskGeneratorType.Table &&
             order.originStructure.CurrentState == StructureState.WaitingForCooking)
         {
+            order.originStructure.ClearDeliveredOrderVisual();
             order.originStructure.SetState(StructureState.Available);
         }
 
         Debug.Log($"[TaskFlowManager] Pedido pendente '{order.orderName}' expirou na fila.");
+    }
+
+    private void StartEatingTimer(TaskGeneratorStructure structure)
+    {
+        if (structure == null)
+            return;
+
+        StopEatingTimer(structure);
+        activeEatingCoroutines[structure] = StartCoroutine(EatingRoutine(structure));
+    }
+
+    private void StopEatingTimer(TaskGeneratorStructure structure)
+    {
+        if (structure == null)
+            return;
+
+        if (!activeEatingCoroutines.TryGetValue(structure, out Coroutine routine))
+            return;
+
+        if (routine != null)
+            StopCoroutine(routine);
+
+        activeEatingCoroutines.Remove(structure);
+    }
+
+    private IEnumerator EatingRoutine(TaskGeneratorStructure structure)
+    {
+        float remaining = structure.EatingDuration;
+
+        while (remaining > 0f)
+        {
+            while (ShouldPausePendingOrderTimers())
+                yield return null;
+
+            remaining -= Time.deltaTime;
+            yield return null;
+        }
+
+        activeEatingCoroutines.Remove(structure);
+
+        if (structure == null)
+            yield break;
+
+        if (structure.CurrentState != StructureState.Eating)
+            yield break;
+
+        structure.ClearDeliveredOrderVisual();
+        structure.SetState(StructureState.Dirty);
+
+        if (TaskSpawner.Instance != null && structure.CleaningTaskData != null)
+            TaskSpawner.Instance.SpawnSpecificTaskOnStructure(structure.CleaningTaskData, structure);
     }
 
     private void RefreshPendingOrdersUI()

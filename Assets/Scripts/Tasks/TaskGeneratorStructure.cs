@@ -14,6 +14,10 @@ public class TaskGeneratorStructure : MonoBehaviour
     [Header("State")]
     [SerializeField] private StructureState currentState = StructureState.Available;
 
+    [Header("Table Flow")]
+    [SerializeField] private float eatingDuration = 8f;
+    [SerializeField] private TaskData cleaningTaskData;
+
     [Header("Wear / Malfunction")]
     [SerializeField] private bool usesWearSystem = false;
     [SerializeField] private int currentWear = 0;
@@ -31,10 +35,20 @@ public class TaskGeneratorStructure : MonoBehaviour
     private TaskPin currentPin;
     private int remainingPenalizedTasks;
 
+    private StructureVisualStateController visualStateController;
+    private OrderRecipeData currentDisplayedOrderRecipe;
+
     public Transform PinContainer => pinContainer;
     public StructureState CurrentState => currentState;
     public bool IsBroken => currentState == StructureState.Broken || currentState == StructureState.Disabled;
     public float AttributePenaltyPercent => remainingPenalizedTasks > 0 ? attributePenaltyPercent : 0f;
+    public float EatingDuration => eatingDuration;
+    public TaskData CleaningTaskData => cleaningTaskData;
+
+    private void Awake()
+    {
+        visualStateController = GetComponent<StructureVisualStateController>();
+    }
 
     public bool CanReceiveTask(TaskType taskType)
     {
@@ -49,8 +63,8 @@ public class TaskGeneratorStructure : MonoBehaviour
 
         if (taskType == TaskType.Service)
         {
-            if (generatorType == TaskGeneratorType.Table &&
-                currentState == StructureState.WaitingForCooking)
+            // Service só deve entrar em estruturas realmente disponíveis.
+            if (currentState != StructureState.Available)
                 return false;
 
             return generatorType == TaskGeneratorType.Cashier ||
@@ -59,6 +73,9 @@ public class TaskGeneratorStructure : MonoBehaviour
 
         if (taskType == TaskType.Cooking)
         {
+            if (currentState != StructureState.Available)
+                return false;
+
             return generatorType == TaskGeneratorType.Oven ||
                    generatorType == TaskGeneratorType.Grill ||
                    generatorType == TaskGeneratorType.Stove ||
@@ -66,7 +83,12 @@ public class TaskGeneratorStructure : MonoBehaviour
         }
 
         if (taskType == TaskType.Operational)
-            return true;
+        {
+            // Operational pode acontecer quando a estrutura estiver Available ou Dirty.
+            // Dirty é o caso da task de limpeza da mesa.
+            return currentState == StructureState.Available ||
+                   currentState == StructureState.Dirty;
+        }
 
         return false;
     }
@@ -91,6 +113,35 @@ public class TaskGeneratorStructure : MonoBehaviour
     public void SetState(StructureState newState)
     {
         currentState = newState;
+
+        if (currentState != StructureState.Eating)
+            currentDisplayedOrderRecipe = null;
+
+        if (visualStateController != null)
+        {
+            if (currentState == StructureState.Eating && currentDisplayedOrderRecipe != null)
+                visualStateController.ShowEatingOrder(currentDisplayedOrderRecipe);
+            else
+                visualStateController.ClearEatingOrder();
+
+            visualStateController.RefreshByStructureState();
+        }
+    }
+
+    public void ShowDeliveredOrderVisual(OrderRecipeData recipeData)
+    {
+        currentDisplayedOrderRecipe = recipeData;
+
+        if (currentState == StructureState.Eating && visualStateController != null)
+            visualStateController.ShowEatingOrder(recipeData);
+    }
+
+    public void ClearDeliveredOrderVisual()
+    {
+        currentDisplayedOrderRecipe = null;
+
+        if (visualStateController != null)
+            visualStateController.ClearEatingOrder();
     }
 
     public void AddCookingWear()
