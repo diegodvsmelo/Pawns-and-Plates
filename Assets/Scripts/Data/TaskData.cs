@@ -41,7 +41,6 @@ public class TaskData : ScriptableObject
     public List<TaskHintLine> taskHints = new();
 
     [Header("Order Flow")]
-    public TaskData followUpCookingTask;
     public List<OrderRecipeData> possibleGeneratedOrders = new();
 
     [Header("Costs")]

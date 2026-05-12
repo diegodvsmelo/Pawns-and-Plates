@@ -137,6 +137,7 @@ Transform:
   - {fileID: 5204664417700500556}
   - {fileID: 3932513368774848764}
   - {fileID: 1191016020033228712}
+  - {fileID: 8053402349975989698}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8581393323506698798
@@ -312,6 +313,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: mesa_burguer-dirty-1
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6f6a246f42063c7428f1c51fdf0fd640, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -468,4 +473,70 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4e2991fc9db99bd4f9df9dafbb542faf, type: 3}
   m_PrefabInstance: {fileID: 5742115686056604583}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7514774646053407273
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 9170722914293696862}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.006
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.254
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_Name
+      value: mesa_pizza
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+--- !u!4 &8053402349975989698 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+  m_PrefabInstance: {fileID: 7514774646053407273}
   m_PrefabAsset: {fileID: 0}

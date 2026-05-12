@@ -8,6 +8,7 @@ public class RestaurantOrder
     public string orderName;
     public Sprite orderIcon;
     public TaskGeneratorType requiredCookingStructure;
+    public TaskData cookingTaskData;
 
     public int baseReward = 10;
     public int reputationReward = 1;
@@ -33,6 +34,7 @@ public class RestaurantOrder
         orderName = data != null ? data.orderName : "Unknown Order";
         orderIcon = data != null ? data.orderIcon : null;
         requiredCookingStructure = data != null ? data.requiredCookingStructure : TaskGeneratorType.Stove;
+        cookingTaskData = data != null ? data.cookingTaskData : null;
 
         baseReward = data != null ? data.baseReward : 10;
         reputationReward = data != null ? data.reputationReward : 1;

@@ -180,11 +180,25 @@ public class TaskFlowManager : MonoBehaviour
                 HandleFailedDelivery(taskPin);
                 break;
 
+            case TaskOutcomeFlow.CleanStructure:
+                HandleFailedCleanStructure(originStructure);
+                break;
+
             default:
                 break;
         }
     }
 
+    private void HandleFailedCleanStructure(TaskGeneratorStructure structure)
+    {
+        if (structure == null)
+            return;
+
+        StopEatingTimer(structure);
+        structure.ClearDeliveredOrderVisual();
+        structure.SetState(StructureState.Available);
+    }
+    
     private void ResolveExpiredFlow(TaskPin taskPin, TaskGeneratorStructure originStructure)
     {
         switch (taskPin.data.outcomeFlow)

@@ -211,13 +211,23 @@ public class TaskSpawner : MonoBehaviour
 
     public bool TrySpawnCookingTaskForOrder(RestaurantOrder order)
     {
-        if (order == null || order.sourceData == null)
+        if (order == null)
             return false;
 
-        TaskData cookingTask = FindCookingTaskForOrder(order);
-
-        if (cookingTask == null)
+        if (order.sourceData == null)
             return false;
+
+        if (order.cookingTaskData == null)
+        {
+            Debug.LogWarning($"[TaskSpawner] Pedido '{order.orderName}' está sem cookingTaskData na receita.");
+            return false;
+        }
+
+        if (order.cookingTaskData.taskType != TaskType.Cooking)
+        {
+            Debug.LogWarning($"[TaskSpawner] A task '{order.cookingTaskData.taskName}' não é do tipo Cooking.");
+            return false;
+        }
 
         TaskGeneratorStructure cookingStructure = FindFirstAvailableStructure(
             order.requiredCookingStructure,
@@ -227,7 +237,7 @@ public class TaskSpawner : MonoBehaviour
         if (cookingStructure == null)
             return false;
 
-        TaskPin cookingPin = SpawnSpecificTaskOnStructure(cookingTask, cookingStructure);
+        TaskPin cookingPin = SpawnSpecificTaskOnStructure(order.cookingTaskData, cookingStructure);
 
         if (cookingPin == null)
             return false;
@@ -476,9 +486,6 @@ public class TaskSpawner : MonoBehaviour
 
         TaskData serviceTaskData = serviceTaskPin.data;
 
-        if (serviceTaskData.followUpCookingTask == null)
-            return;
-
         OrderRecipeData orderData = PickRandomGeneratedOrder(serviceTaskData);
 
         if (orderData == null)
@@ -540,28 +547,6 @@ public class TaskSpawner : MonoBehaviour
                 continue;
 
             return structure;
-        }
-
-        return null;
-    }
-
-    private TaskData FindCookingTaskForOrder(RestaurantOrder order)
-    {
-        if (order == null)
-            return null;
-
-        foreach (TaskData task in possibleTasks)
-        {
-            if (task == null)
-                continue;
-
-            if (task.taskType != TaskType.Cooking)
-                continue;
-
-            if (task.outcomeFlow != TaskOutcomeFlow.DeliverOrder)
-                continue;
-
-            return task;
         }
 
         return null;

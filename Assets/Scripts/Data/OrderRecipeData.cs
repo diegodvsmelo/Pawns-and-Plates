@@ -7,8 +7,9 @@ public class OrderRecipeData : ScriptableObject
     public string orderName;
     public Sprite orderIcon;
 
-    [Header("Cooking Target")]
+    [Header("Cooking")]
     public TaskGeneratorType requiredCookingStructure;
+    public TaskData cookingTaskData;
 
     [Header("Rewards")]
     public int baseReward = 10;

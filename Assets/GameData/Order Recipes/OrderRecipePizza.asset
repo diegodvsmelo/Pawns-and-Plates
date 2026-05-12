@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 251f9e3af706def40972c5527a7a89bc, type: 3}
-  m_Name: OrderRecipeBurguer
+  m_Name: OrderRecipePizza
   m_EditorClassIdentifier: Assembly-CSharp::OrderRecipeData
-  orderName: Hamburguer
-  orderIcon: {fileID: 21300000, guid: 5d25dde5db8626e48b03a48b1ca22d9b, type: 3}
-  requiredCookingStructure: 3
-  cookingTaskData: {fileID: 11400000, guid: 1c9a71da5a6615c4eaeaaa5e2cc0f022, type: 2}
+  orderName: Pizza
+  orderIcon: {fileID: 0}
+  requiredCookingStructure: 2
+  cookingTaskData: {fileID: 11400000, guid: e790e7938a01e84469a507604096afbc, type: 2}
   baseReward: 10
   reputationReward: 1
   cookingRequirement: 7
