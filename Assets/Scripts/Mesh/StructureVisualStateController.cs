@@ -14,14 +14,17 @@ public class StructureVisualStateController : MonoBehaviour
     [Header("References")]
     [SerializeField] private TaskGeneratorStructure structure;
 
-    [Header("State Visuals (Optional)")]
-    [SerializeField] private GameObject dirtyVisual;
+    [Header("Generic State Visuals (Optional)")]
     [SerializeField] private GameObject brokenVisual;
 
     [Header("Eating Order Visuals")]
-    [SerializeField] private List<OrderVisualEntry> orderVisuals = new();
+    [SerializeField] private List<OrderVisualEntry> eatingOrderVisuals = new();
 
-    private OrderRecipeData currentDisplayedOrder;
+    [Header("Dirty Order Visuals")]
+    [SerializeField] private List<OrderVisualEntry> dirtyOrderVisuals = new();
+
+    private OrderRecipeData currentEatingRecipe;
+    private OrderRecipeData currentDirtyRecipe;
 
     private void Awake()
     {
@@ -34,13 +37,32 @@ public class StructureVisualStateController : MonoBehaviour
 
     public void ShowEatingOrder(OrderRecipeData recipeData)
     {
-        currentDisplayedOrder = recipeData;
+        currentEatingRecipe = recipeData;
         RefreshByStructureState();
     }
 
     public void ClearEatingOrder()
     {
-        currentDisplayedOrder = null;
+        currentEatingRecipe = null;
+        RefreshByStructureState();
+    }
+
+    public void ShowDirtyOrder(OrderRecipeData recipeData)
+    {
+        currentDirtyRecipe = recipeData;
+        RefreshByStructureState();
+    }
+
+    public void ClearDirtyOrder()
+    {
+        currentDirtyRecipe = null;
+        RefreshByStructureState();
+    }
+
+    public void ClearAllOrderVisuals()
+    {
+        currentEatingRecipe = null;
+        currentDirtyRecipe = null;
         RefreshByStructureState();
     }
 
@@ -59,47 +81,58 @@ public class StructureVisualStateController : MonoBehaviour
             return;
         }
 
-        if (structure.CurrentState == StructureState.Dirty)
+        if (structure.CurrentState == StructureState.Eating && currentEatingRecipe != null)
         {
-            if (dirtyVisual != null)
-                dirtyVisual.SetActive(true);
-
+            ShowMappedVisual(eatingOrderVisuals, currentEatingRecipe);
             return;
         }
 
-        if (structure.CurrentState == StructureState.Eating && currentDisplayedOrder != null)
+        if (structure.CurrentState == StructureState.Dirty && currentDirtyRecipe != null)
         {
-            for (int i = 0; i < orderVisuals.Count; i++)
-            {
-                if (orderVisuals[i] == null)
-                    continue;
+            ShowMappedVisual(dirtyOrderVisuals, currentDirtyRecipe);
+            return;
+        }
+    }
 
-                if (orderVisuals[i].recipeData != currentDisplayedOrder)
-                    continue;
+    private void ShowMappedVisual(List<OrderVisualEntry> entries, OrderRecipeData recipeData)
+    {
+        for (int i = 0; i < entries.Count; i++)
+        {
+            OrderVisualEntry entry = entries[i];
 
-                if (orderVisuals[i].visualObject != null)
-                    orderVisuals[i].visualObject.SetActive(true);
+            if (entry == null)
+                continue;
 
-                return;
-            }
+            if (entry.recipeData != recipeData)
+                continue;
+
+            if (entry.visualObject != null)
+                entry.visualObject.SetActive(true);
+
+            return;
         }
     }
 
     private void HideAllImmediate()
     {
-        if (dirtyVisual != null)
-            dirtyVisual.SetActive(false);
-
         if (brokenVisual != null)
             brokenVisual.SetActive(false);
 
-        for (int i = 0; i < orderVisuals.Count; i++)
+        HideEntryList(eatingOrderVisuals);
+        HideEntryList(dirtyOrderVisuals);
+    }
+
+    private void HideEntryList(List<OrderVisualEntry> entries)
+    {
+        for (int i = 0; i < entries.Count; i++)
         {
-            if (orderVisuals[i] == null)
+            OrderVisualEntry entry = entries[i];
+
+            if (entry == null)
                 continue;
 
-            if (orderVisuals[i].visualObject != null)
-                orderVisuals[i].visualObject.SetActive(false);
+            if (entry.visualObject != null)
+                entry.visualObject.SetActive(false);
         }
     }
 }

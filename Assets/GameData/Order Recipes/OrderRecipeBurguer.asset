@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 251f9e3af706def40972c5527a7a89bc, type: 3}
   m_Name: OrderRecipeBurguer
   m_EditorClassIdentifier: Assembly-CSharp::OrderRecipeData
-  orderName: Hamburguer
+  orderName: Hamburger
   orderIcon: {fileID: 21300000, guid: 5d25dde5db8626e48b03a48b1ca22d9b, type: 3}
   requiredCookingStructure: 3
   cookingTaskData: {fileID: 11400000, guid: 1c9a71da5a6615c4eaeaaa5e2cc0f022, type: 2}

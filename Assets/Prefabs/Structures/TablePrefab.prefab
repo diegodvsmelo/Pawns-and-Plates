@@ -181,11 +181,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StructureVisualStateController
   structure: {fileID: 8581393323506698798}
-  dirtyVisual: {fileID: 2003123741568079122}
   brokenVisual: {fileID: 0}
-  orderVisuals:
+  eatingOrderVisuals:
   - recipeData: {fileID: 11400000, guid: 41b4fa37785b4ab43b7e3b0520bae5f6, type: 2}
     visualObject: {fileID: 4456532550977645126}
+  - recipeData: {fileID: 11400000, guid: 6d0a1e1f7a5c74e44afaf9ff8123a97e, type: 2}
+    visualObject: {fileID: 7244249355135039352}
+  dirtyOrderVisuals:
+  - recipeData: {fileID: 11400000, guid: 41b4fa37785b4ab43b7e3b0520bae5f6, type: 2}
+    visualObject: {fileID: 2003123741568079122}
+  - recipeData: {fileID: 11400000, guid: 6d0a1e1f7a5c74e44afaf9ff8123a97e, type: 2}
+    visualObject: {fileID: 2003123741568079122}
 --- !u!1 &3223133387624127251
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,6 +541,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+--- !u!1 &7244249355135039352 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}
+  m_PrefabInstance: {fileID: 7514774646053407273}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8053402349975989698 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8e2fa2664e7bee547ac8eb8004ff63cf, type: 3}

@@ -36,7 +36,8 @@ public class TaskGeneratorStructure : MonoBehaviour
     private int remainingPenalizedTasks;
 
     private StructureVisualStateController visualStateController;
-    private OrderRecipeData currentDisplayedOrderRecipe;
+    private OrderRecipeData currentEatingOrderRecipe;
+    private OrderRecipeData currentDirtyOrderRecipe;
 
     public Transform PinContainer => pinContainer;
     public StructureState CurrentState => currentState;
@@ -114,15 +115,17 @@ public class TaskGeneratorStructure : MonoBehaviour
     {
         currentState = newState;
 
-        if (currentState != StructureState.Eating)
-            currentDisplayedOrderRecipe = null;
-
         if (visualStateController != null)
         {
-            if (currentState == StructureState.Eating && currentDisplayedOrderRecipe != null)
-                visualStateController.ShowEatingOrder(currentDisplayedOrderRecipe);
+            if (currentState == StructureState.Eating && currentEatingOrderRecipe != null)
+                visualStateController.ShowEatingOrder(currentEatingOrderRecipe);
             else
                 visualStateController.ClearEatingOrder();
+
+            if (currentState == StructureState.Dirty && currentDirtyOrderRecipe != null)
+                visualStateController.ShowDirtyOrder(currentDirtyOrderRecipe);
+            else
+                visualStateController.ClearDirtyOrder();
 
             visualStateController.RefreshByStructureState();
         }
@@ -130,7 +133,8 @@ public class TaskGeneratorStructure : MonoBehaviour
 
     public void ShowDeliveredOrderVisual(OrderRecipeData recipeData)
     {
-        currentDisplayedOrderRecipe = recipeData;
+        currentEatingOrderRecipe = recipeData;
+        currentDirtyOrderRecipe = recipeData;
 
         if (currentState == StructureState.Eating && visualStateController != null)
             visualStateController.ShowEatingOrder(recipeData);
@@ -138,7 +142,7 @@ public class TaskGeneratorStructure : MonoBehaviour
 
     public void ClearDeliveredOrderVisual()
     {
-        currentDisplayedOrderRecipe = null;
+        currentEatingOrderRecipe = null;
 
         if (visualStateController != null)
             visualStateController.ClearEatingOrder();
@@ -155,6 +159,24 @@ public class TaskGeneratorStructure : MonoBehaviour
         TryRollMalfunction();
     }
 
+    public void ShowDirtyOrderVisual()
+    {
+        if (visualStateController == null)
+            return;
+
+        if (currentDirtyOrderRecipe != null && currentState == StructureState.Dirty)
+            visualStateController.ShowDirtyOrder(currentDirtyOrderRecipe);
+    }
+
+    public void ClearAllOrderVisuals()
+    {
+        currentEatingOrderRecipe = null;
+        currentDirtyOrderRecipe = null;
+
+        if (visualStateController != null)
+            visualStateController.ClearAllOrderVisuals();
+    }
+    
     private void TryRollMalfunction()
     {
         if (currentWear < wearToStartRisk)

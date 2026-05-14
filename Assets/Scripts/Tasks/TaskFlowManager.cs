@@ -195,10 +195,10 @@ public class TaskFlowManager : MonoBehaviour
             return;
 
         StopEatingTimer(structure);
-        structure.ClearDeliveredOrderVisual();
+        structure.ClearAllOrderVisuals();
         structure.SetState(StructureState.Available);
     }
-    
+
     private void ResolveExpiredFlow(TaskPin taskPin, TaskGeneratorStructure originStructure)
     {
         switch (taskPin.data.outcomeFlow)
@@ -208,13 +208,17 @@ public class TaskFlowManager : MonoBehaviour
 
                 if (originStructure != null && originStructure.CurrentState != StructureState.Eating)
                 {
-                    originStructure.ClearDeliveredOrderVisual();
+                    originStructure.ClearAllOrderVisuals();
                     originStructure.SetState(StructureState.Available);
                 }
                 break;
 
             case TaskOutcomeFlow.DeliverOrder:
                 HandleFailedDelivery(taskPin);
+                break;
+
+            case TaskOutcomeFlow.CleanStructure:
+                HandleFailedCleanStructure(originStructure);
                 break;
 
             default:
@@ -273,7 +277,7 @@ public class TaskFlowManager : MonoBehaviour
             if (order.originStructure != null &&
                 order.originStructure.generatorType == TaskGeneratorType.Table)
             {
-                order.originStructure.ClearDeliveredOrderVisual();
+                order.originStructure.ClearAllOrderVisuals();
                 order.originStructure.SetState(StructureState.Available);
             }
 
@@ -298,7 +302,7 @@ public class TaskFlowManager : MonoBehaviour
             return;
 
         StopEatingTimer(structure);
-        structure.ClearDeliveredOrderVisual();
+        structure.ClearAllOrderVisuals();
         structure.SetState(StructureState.Available);
     }
 
@@ -382,7 +386,7 @@ public class TaskFlowManager : MonoBehaviour
             order.originStructure.generatorType == TaskGeneratorType.Table &&
             order.originStructure.CurrentState == StructureState.WaitingForCooking)
         {
-            order.originStructure.ClearDeliveredOrderVisual();
+            order.originStructure.ClearAllOrderVisuals();
             order.originStructure.SetState(StructureState.Available);
         }
 
@@ -435,6 +439,7 @@ public class TaskFlowManager : MonoBehaviour
 
         structure.ClearDeliveredOrderVisual();
         structure.SetState(StructureState.Dirty);
+        structure.ShowDirtyOrderVisual();
 
         if (TaskSpawner.Instance != null && structure.CleaningTaskData != null)
             TaskSpawner.Instance.SpawnSpecificTaskOnStructure(structure.CleaningTaskData, structure);

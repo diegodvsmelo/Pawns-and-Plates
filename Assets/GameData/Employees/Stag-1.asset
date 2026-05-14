@@ -14,18 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EmployeeData
   employeeName: Stag
   profilePicture: {fileID: 21300000, guid: 0f5710185e5fc1640bc50fb6453a6efe, type: 3}
-  cookingSkill: 1
+  cookingSkill: 2
   serviceSkill: 5
   operationalSkill: 4
   agility: 3
   maxStamina: 100
-  currentStamina: 60
+  currentStamina: 80
   availabilityState: 0
-  currentLevel: 2
-  currentXP: 145
-  skillPoints: 1
+  currentLevel: 1
+  currentXP: 40
+  skillPoints: 0
   hasTrait: 0
   traitName: 
   statusIconA: {fileID: 0}
   statusIconB: {fileID: 0}
   baseSalary: 1
+  resetRuntimeStateOnSessionStart: 1
+  startSessionWithFullStamina: 1
+  sessionStartStamina: 100
+  sessionStartLevel: 1
+  sessionStartXP: 0
+  sessionStartSkillPoints: 0
+  sessionStartAvailability: 0

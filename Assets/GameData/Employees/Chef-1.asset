@@ -15,14 +15,14 @@ MonoBehaviour:
   employeeName: Jansinho
   profilePicture: {fileID: 21300000, guid: 0f5710185e5fc1640bc50fb6453a6efe, type: 3}
   cookingSkill: 5
-  serviceSkill: 7
-  operationalSkill: 2
+  serviceSkill: 4
+  operationalSkill: 3
   agility: 2
   maxStamina: 200
-  currentStamina: 180
-  availabilityState: 1
+  currentStamina: 200
+  availabilityState: 0
   currentLevel: 1
-  currentXP: 0
+  currentXP: 20
   skillPoints: 0
   hasTrait: 0
   traitName: 

@@ -35,7 +35,6 @@ MonoBehaviour:
     highlightedText: hurry up a bit
     suffixText: before the next client comes
     relatedSkill: 3
-  followUpCookingTask: {fileID: 0}
   possibleGeneratedOrders: []
   staminaCost: 20
   moneyReward: 0
@@ -46,5 +45,5 @@ MonoBehaviour:
   xpOnCritical: 75
   bonusMoneyOnCritical: 0
   bonusReputationOnCritical: 0
-  taskIcon: {fileID: 0}
+  taskIcon: {fileID: 21300000, guid: 5ef18203c26558e40ba4613e03f7dce7, type: 3}
   taskColor: {r: 1, g: 1, b: 1, a: 1}

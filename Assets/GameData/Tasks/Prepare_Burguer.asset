@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32651cb891b2e6b4c9c3b317e690027c, type: 3}
   m_Name: Prepare_Burguer
   m_EditorClassIdentifier: Assembly-CSharp::TaskData
-  taskName: Prepare Burguer
+  taskName: Prepare Burger
   description: Cook and plate a hamburger.
   taskType: 1
   outcomeFlow: 2
@@ -35,7 +35,6 @@ MonoBehaviour:
     highlightedText: fast
     suffixText: ' before the clients leave'
     relatedSkill: 3
-  followUpCookingTask: {fileID: 0}
   possibleGeneratedOrders: []
   staminaCost: 15
   moneyReward: 0
@@ -46,5 +45,5 @@ MonoBehaviour:
   xpOnCritical: 20
   bonusMoneyOnCritical: 0
   bonusReputationOnCritical: 10
-  taskIcon: {fileID: 21300000, guid: 5d25dde5db8626e48b03a48b1ca22d9b, type: 3}
+  taskIcon: {fileID: 21300000, guid: 78dae12e04a59734b91bc7006ea30260, type: 3}
   taskColor: {r: 1, g: 1, b: 1, a: 1}
