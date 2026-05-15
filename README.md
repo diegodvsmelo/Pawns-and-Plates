@@ -269,9 +269,9 @@ Implemented / prototyped:
 
 ### Phase 6 — Daily Loop and Progression
 
-- [ ] Stop new tasks when day timer ends
-- [ ] Let active tasks finish before ending day
-- [ ] Generate end-of-day report
+- [x] Stop new tasks when day timer ends
+- [x] Let active tasks finish before ending day
+- [x] Generate end-of-day report
 - [ ] Connect revenue and payroll
 - [ ] Add reputation tiers
 - [ ] Unlock team size / stations / hiring by progression

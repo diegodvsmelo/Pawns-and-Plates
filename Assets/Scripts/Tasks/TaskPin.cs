@@ -26,6 +26,7 @@ public class TaskPin : MonoBehaviour
     [SerializeField] private Color expiredColor;
 
     [Header("Timer Colors")]
+    [SerializeField] private Color timerTrackColor = Color.black;
     [SerializeField] private Color availableTimerColor;
     [SerializeField] private Color executionTimerColor;
     [SerializeField] private Color readyTimerColor;
@@ -107,8 +108,9 @@ public class TaskPin : MonoBehaviour
 
         timerSlider.minValue = 0f;
         timerSlider.maxValue = 1f;
-        timerSlider.value = 1f;
+        timerSlider.value = 0f;
         timerSlider.interactable = false;
+        timerSlider.direction = Slider.Direction.LeftToRight;
     }
 
     private void UpdateAvailableTimer()
@@ -148,7 +150,7 @@ public class TaskPin : MonoBehaviour
     {
         if (Instance == null || data == null)
         {
-            Debug.LogWarning("Não foi possível iniciar execução: Instance ou Data null.");
+            Debug.LogWarning("Could not start execution: Instance or Data is null.");
             return;
         }
 
@@ -157,7 +159,7 @@ public class TaskPin : MonoBehaviour
         Instance.remainingExecutionTime = data.executionTime;
         SetState(TaskState.InProgress);
 
-        Debug.Log($"Task '{data.taskName}' entrou em execução por {data.executionTime} segundos.");
+        Debug.Log($"Task '{data.taskName}' started execution for {data.executionTime} seconds.");
     }
 
     public void SetState(TaskState newState)
@@ -219,15 +221,18 @@ public class TaskPin : MonoBehaviour
         }
 
         if (timerBackgroundImage != null)
+            timerBackgroundImage.color = timerTrackColor;
+
+        if (timerFillImage != null)
         {
             if (Instance.state == TaskState.Available)
-                timerBackgroundImage.color = availableTimerColor;
+                timerFillImage.color = availableTimerColor;
             else if (Instance.state == TaskState.InProgress)
-                timerBackgroundImage.color = executionTimerColor;
+                timerFillImage.color = executionTimerColor;
             else if (Instance.state == TaskState.ReadyToCollect)
-                timerBackgroundImage.color = readyTimerColor;
+                timerFillImage.color = readyTimerColor;
             else if (Instance.state == TaskState.Expired)
-                timerBackgroundImage.color = expiredTimerColor;
+                timerFillImage.color = expiredTimerColor;
         }
 
         if (stateText != null)
@@ -243,18 +248,6 @@ public class TaskPin : MonoBehaviour
             else
                 stateText.text = "";
         }
-
-        UpdateFillVisibility();
-    }
-
-    private void UpdateFillVisibility()
-    {
-        if (timerFillImage == null || Instance == null)
-            return;
-
-        Color color = timerFillImage.color;
-        color.a = Instance.state == TaskState.ReadyToCollect ? 0f : 1f;
-        timerFillImage.color = color;
     }
 
     private void UpdateTimerVisual()
@@ -279,7 +272,8 @@ public class TaskPin : MonoBehaviour
             if (data.expirationTime <= 0f)
                 return 1f;
 
-            return Mathf.Clamp01(Instance.remainingExpirationTime / data.expirationTime);
+            float remainingRatio = Mathf.Clamp01(Instance.remainingExpirationTime / data.expirationTime);
+            return 1f - remainingRatio;
         }
 
         if (Instance.state == TaskState.InProgress)
@@ -287,7 +281,8 @@ public class TaskPin : MonoBehaviour
             if (data.executionTime <= 0f)
                 return 1f;
 
-            return Mathf.Clamp01(Instance.remainingExecutionTime / data.executionTime);
+            float remainingRatio = Mathf.Clamp01(Instance.remainingExecutionTime / data.executionTime);
+            return 1f - remainingRatio;
         }
 
         if (Instance.state == TaskState.ReadyToCollect)
@@ -313,10 +308,10 @@ public class TaskPin : MonoBehaviour
             return Mathf.CeilToInt(Instance.remainingExecutionTime).ToString();
 
         if (Instance.state == TaskState.ReadyToCollect)
-            return "Pronto";
+            return "Ready";
 
         if (Instance.state == TaskState.Expired)
-            return "Expirou";
+            return "Expired";
 
         return "";
     }

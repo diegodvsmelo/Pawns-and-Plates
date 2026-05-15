@@ -4,6 +4,8 @@ using UnityEngine;
 [DefaultExecutionOrder(-100)]
 public class EmployeeRuntimeManager : MonoBehaviour
 {
+    public static EmployeeRuntimeManager Instance { get; private set; }
+
     [Header("Employees To Manage")]
     [SerializeField] private List<EmployeeData> sessionEmployees = new();
 
@@ -15,6 +17,14 @@ public class EmployeeRuntimeManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
         BuildUniqueList();
         ResetEmployeesForSession();
     }
@@ -49,6 +59,19 @@ public class EmployeeRuntimeManager : MonoBehaviour
 
             if (employee.ShouldResetRuntimeStateOnSessionStart())
                 employee.ResetRuntimeStateForSession();
+        }
+    }
+
+    public void ResetEmployeesForNewDay()
+    {
+        foreach (EmployeeData employee in uniqueEmployees)
+        {
+            if (employee == null)
+                continue;
+
+            employee.currentStamina = employee.maxStamina;
+            employee.SetAvailable();
+            employee.NotifyDataChanged();
         }
     }
 

@@ -486,5 +486,20 @@ public class TaskFlowManager : MonoBehaviour
 
         return false;
     }
+
+    public void ResetForNewDay()
+    {
+        foreach (Coroutine routine in activeEatingCoroutines.Values)
+        {
+            if (routine != null)
+                StopCoroutine(routine);
+        }
+
+        activeEatingCoroutines.Clear();
+        pendingOrders.Clear();
+        ordersByTaskPin.Clear();
+
+        RefreshPendingOrdersUI();
+    }
     
 }

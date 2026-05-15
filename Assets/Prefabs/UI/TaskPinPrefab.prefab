@@ -66,7 +66,7 @@ MonoBehaviour:
   data: {fileID: 0}
   button: {fileID: 7201689175306159228}
   iconImage: {fileID: 5477043692592805918}
-  backgroundImage: {fileID: 0}
+  backgroundImage: {fileID: 946149691277733400}
   timerSlider: {fileID: 8393402553189997876}
   timerFillImage: {fileID: 5254021992925688938}
   timerBackgroundImage: {fileID: 946149691277733400}
@@ -76,6 +76,7 @@ MonoBehaviour:
   inProgressColor: {r: 0.9843137, g: 0.6745098, b: 0.21176471, a: 0}
   readyToCollectColor: {r: 0.40392157, g: 0.7176471, b: 0.3882353, a: 0}
   expiredColor: {r: 0.5, g: 0.5, b: 0.5, a: 0}
+  timerTrackColor: {r: 0, g: 0, b: 0, a: 1}
   availableTimerColor: {r: 0.84705883, g: 0.29803923, b: 0.23921569, a: 1}
   executionTimerColor: {r: 0.9843138, g: 0.6745098, b: 0.21176472, a: 1}
   readyTimerColor: {r: 0.4039216, g: 0.7176471, b: 0.38823533, a: 1}
@@ -188,8 +189,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -4.9285, y: -0}
-  m_SizeDelta: {x: -9.857, y: 0}
+  m_AnchoredPosition: {x: -2.2992, y: 0}
+  m_SizeDelta: {x: -3.3484, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2311178766884594064
 GameObject:
@@ -426,7 +427,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2465553736440684306}
-  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_ConstrainProportionsScale: 1
@@ -434,7 +435,7 @@ RectTransform:
   - {fileID: 8675966727155014976}
   - {fileID: 1172358175899137330}
   m_Father: {fileID: 2730495227054713307}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -5.7}
@@ -487,7 +488,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -525,8 +526,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 5.1, y: 0}
-  m_SizeDelta: {x: 10, y: 0}
+  m_AnchoredPosition: {x: 2.53, y: -0}
+  m_SizeDelta: {x: 3.8611, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8845624863343710482
 CanvasRenderer:

@@ -1,17 +1,46 @@
 using UnityEngine;
 using TMPro;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class DayCycleManager : MonoBehaviour
 {
     public static DayCycleManager Instance { get; private set; }
 
-    [Header("UI References")]
+    [Header("Daily Report Buttons")]
+    [SerializeField] private Button startNextDayButton;
+
+    [Header("Top Bar UI")]
     [SerializeField] private TextMeshProUGUI dayText;
     [SerializeField] private TextMeshProUGUI clockText;
     [SerializeField] private RectTransform clockRoot;
+
+    [Header("Report Text Colors")]
+    [SerializeField] private Color positiveValueColor = Color.green;
+    [SerializeField] private Color negativeValueColor = Color.red;
+    [SerializeField] private Color neutralValueColor = Color.white;
+
+    [Header("Daily Report Panel")]
     [SerializeField] private GameObject dailyReportPanel;
-    [SerializeField] private TextMeshProUGUI reportDetailsText;
+
+    [Header("Tasks Processed")]
+    [SerializeField] private TextMeshProUGUI tasksProcessedDetailsText;
+    [SerializeField] private TextMeshProUGUI successRateText;
+
+    [Header("Money Summary")]
+    [SerializeField] private TextMeshProUGUI moneySummaryDetailsText;
+    [SerializeField] private TextMeshProUGUI netProfitText;
+
+    [Header("Reputation Summary")]
+    [SerializeField] private TextMeshProUGUI reputationSummaryDetailsText;
+    [SerializeField] private TextMeshProUGUI netReputationText;
+
+    [Header("Updated Totals")]
+    [SerializeField] private TextMeshProUGUI totalMoneyText;
+    [SerializeField] private TextMeshProUGUI totalReputationText;
+    [SerializeField] private TextMeshProUGUI daysCompletedText;
 
     [Header("Day Timing")]
     [SerializeField] private int startHour = 8;
@@ -25,6 +54,13 @@ public class DayCycleManager : MonoBehaviour
     [Header("Game State")]
     [SerializeField] private int currentDay = 1;
     [SerializeField] private int moneyEarnedToday = 0;
+    [SerializeField] private int taskRevenueToday = 0;
+    [SerializeField] private int tipsEarnedToday = 0;
+    [SerializeField] private int taskReputationToday = 0;
+    [SerializeField] private int failedTaskPenaltyToday = 0;
+    [SerializeField] private int totalTasksToday = 0;
+    [SerializeField] private int perfectTasksToday = 0;
+    [SerializeField] private int failedTasksToday = 0;
 
     public event Action<int> OnDayChanged;
     public event Action<int> OnDailyEarningsChanged;
@@ -81,6 +117,14 @@ public class DayCycleManager : MonoBehaviour
         if (clockRoot != null)
             originalClockAnchoredPosition = clockRoot.anchoredPosition;
 
+
+        if (startNextDayButton != null)
+        {
+            startNextDayButton.onClick.RemoveListener(StartNextDay);
+            startNextDayButton.onClick.AddListener(StartNextDay);
+            startNextDayButton.gameObject.SetActive(false);
+        }
+
         InitializeDayClock();
         NotifyDayStateChanged();
         UpdateUI();
@@ -118,10 +162,56 @@ public class DayCycleManager : MonoBehaviour
         dayState = DayState.Running;
     }
 
+    private void ResetDailyCounters()
+    {
+        moneyEarnedToday = 0;
+        taskRevenueToday = 0;
+        tipsEarnedToday = 0;
+        taskReputationToday = 0;
+        failedTaskPenaltyToday = 0;
+        totalTasksToday = 0;
+        perfectTasksToday = 0;
+        failedTasksToday = 0;
+    }
+
     public void AddDailyEarnings(int amount)
     {
         moneyEarnedToday += amount;
+        taskRevenueToday += amount;
         OnDailyEarningsChanged?.Invoke(moneyEarnedToday);
+    }
+
+    public void AddDailyTips(int amount)
+    {
+        tipsEarnedToday += amount;
+        moneyEarnedToday += amount;
+        OnDailyEarningsChanged?.Invoke(moneyEarnedToday);
+    }
+
+    public void RegisterTaskResult(bool wasSuccessful, bool isPerfect, int reputationDelta)
+    {
+        totalTasksToday++;
+
+        if (wasSuccessful)
+        {
+            if (isPerfect)
+                perfectTasksToday++;
+        }
+        else
+        {
+            failedTasksToday++;
+        }
+
+        if (reputationDelta > 0)
+            taskReputationToday += reputationDelta;
+        else if (reputationDelta < 0)
+            failedTaskPenaltyToday += Mathf.Abs(reputationDelta);
+    }
+
+    public void RegisterFailedTaskPenalty(int penaltyAmount)
+    {
+        if (penaltyAmount > 0)
+            failedTaskPenaltyToday += penaltyAmount;
     }
 
     private void TickClock()
@@ -202,58 +292,112 @@ public class DayCycleManager : MonoBehaviour
         dayState = DayState.ReportOpen;
 
         int totalSalaries = CalculateTotalWages();
+        int dailyExpenses = totalSalaries;
 
         if (resourceManager != null)
             resourceManager.ModifyMoney(-totalSalaries);
 
-        int profit = moneyEarnedToday - totalSalaries;
+        int netProfit = moneyEarnedToday - dailyExpenses;
+        int netReputation = taskReputationToday - failedTaskPenaltyToday;
 
-        OnDayEnded?.Invoke(moneyEarnedToday, totalSalaries, profit);
-        ShowDailyReport(totalSalaries, profit);
+        OnDayEnded?.Invoke(moneyEarnedToday, totalSalaries, netProfit);
+
+        ShowDailyReport(dailyExpenses, netProfit, netReputation);
     }
 
     private int CalculateTotalWages()
     {
         int total = 0;
 
-        EmployeeCard[] allCards = FindObjectsByType<EmployeeCard>(FindObjectsSortMode.None);
+        if (EmployeeRosterManager.Instance == null)
+            return total;
 
-        foreach (EmployeeCard card in allCards)
+        IReadOnlyList<EmployeeData> employees = EmployeeRosterManager.Instance.CurrentEmployees;
+
+        for (int i = 0; i < employees.Count; i++)
         {
-            if (card == null || card.data == null)
+            EmployeeData employee = employees[i];
+
+            if (employee == null)
                 continue;
 
-            if (card.transform.parent != null)
-                total += card.data.GetDailyCost();
+            total += employee.GetDailyCost();
         }
 
         return total;
     }
 
-    private void ShowDailyReport(int wagesPaid, int profit)
-{
-    string report = $"DAY {currentDay} SUMMARY\n\n";
-    report += $"Revenue: <color=green>+${moneyEarnedToday}</color>\n";
-    report += $"Wages: <color=red>-${wagesPaid}</color>\n";
-    report += "----------------\n";
+    private void ShowDailyReport(int dailyExpenses, int netProfit, int netReputation)
+    {
+        float successRate = totalTasksToday > 0
+            ? ((float)(totalTasksToday - failedTasksToday) / totalTasksToday) * 100f
+            : 0f;
 
-    if (profit >= 0)
-        report += $"Net Profit: <color=green>${profit}</color>";
-    else
-        report += $"Loss: <color=red>${profit}</color>";
+        if (tasksProcessedDetailsText != null)
+        {
+            tasksProcessedDetailsText.text =
+                $"Total Tasks: {totalTasksToday}\n" +
+                $"Perfect Tasks: {perfectTasksToday}\n" +
+                $"Failed Tasks: {failedTasksToday}";
+        }
 
-    if (reportDetailsText != null)
-        reportDetailsText.text = report;
+        if (successRateText != null)
+        {
+            successRateText.text = $"SUCCESS RATE: {successRate.ToString("F1")}%";
+        }
 
-    if (dailyReportPanel != null)
-        dailyReportPanel.SetActive(true);
-}
+        if (moneySummaryDetailsText != null)
+        {
+            moneySummaryDetailsText.text =
+                $"Task Revenue: {FormatSignedMoney(taskRevenueToday)}\n" +
+                $"Tips Earned: {FormatSignedMoney(tipsEarnedToday)}\n" +
+                $"Employee Salaries: {FormatSignedMoney(-CalculateTotalWages())}\n" +
+                $"Daily Expenses: {FormatSignedMoney(-dailyExpenses)}";
+        }
+
+        if (netProfitText != null)
+        {
+            netProfitText.text = $"NET PROFIT: {FormatSignedMoney(netProfit)}";
+        }
+
+        if (reputationSummaryDetailsText != null)
+        {
+            reputationSummaryDetailsText.text =
+                $"Task Reputation: {FormatSignedValue(taskReputationToday)}\n" +
+                $"Failed Task Penalty: {FormatSignedValue(-failedTaskPenaltyToday)}";
+        }
+
+        if (netReputationText != null)
+        {
+            netReputationText.text = $"NET REPUTATION: {FormatSignedValue(netReputation)}";
+        }
+
+        if (totalMoneyText != null && resourceManager != null)
+        {
+            totalMoneyText.text = $"${resourceManager.CurrentMoney}";
+        }
+
+        if (totalReputationText != null && resourceManager != null)
+        {
+            totalReputationText.text = $"{resourceManager.CurrentReputation} POINTS";
+        }
+
+        if (daysCompletedText != null)
+        {
+            daysCompletedText.text = $"{currentDay}";
+        }
+
+        if (dailyReportPanel != null)
+            dailyReportPanel.SetActive(true);
+
+        if (startNextDayButton != null)
+            startNextDayButton.gameObject.SetActive(true);
+    }
 
     public void StartNextDay()
     {
         currentDay++;
-        moneyEarnedToday = 0;
-
+        ResetDailyCounters();
         InitializeDayClock();
 
         if (dailyReportPanel != null)
@@ -261,6 +405,31 @@ public class DayCycleManager : MonoBehaviour
 
         if (taskSpawner == null)
             taskSpawner = TaskSpawner.Instance;
+
+        if (taskSpawner != null)
+            taskSpawner.ResetForNewDay();
+
+        if (TaskFlowManager.Instance != null)
+            TaskFlowManager.Instance.ResetForNewDay();
+
+        TaskGeneratorStructure[] allStructures = FindObjectsByType<TaskGeneratorStructure>(FindObjectsSortMode.None);
+
+        for (int i = 0; i < allStructures.Length; i++)
+        {
+            if (allStructures[i] == null)
+                continue;
+
+            allStructures[i].ResetForNewDay();
+        }
+
+        if (EmployeeRuntimeManager.Instance != null)
+            EmployeeRuntimeManager.Instance.ResetEmployeesForNewDay();
+
+        if (EmployeeRosterManager.Instance != null)
+            EmployeeRosterManager.Instance.RefreshAllViews();
+
+        if (startNextDayButton != null)
+            startNextDayButton.gameObject.SetActive(true);
 
         if (taskSpawner != null)
             taskSpawner.StartSpawning();
@@ -286,7 +455,7 @@ public class DayCycleManager : MonoBehaviour
     private void UpdateDayUI()
     {
         if (dayText != null)
-            dayText.text = $"CURRENT DAY: {currentDay}";
+            dayText.text = $"Day {currentDay}";
     }
 
     private void UpdateClockUI()
@@ -295,7 +464,34 @@ public class DayCycleManager : MonoBehaviour
             clockText.text = $"{currentHour:00}:{currentMinute:00}";
     }
 
-    private System.Collections.IEnumerator ClockWarningShakeRoutine()
+    private string FormatSignedMoney(int value)
+    {
+        if (value > 0)
+            return WrapWithColor($"+ ${value}", positiveValueColor);
+
+        if (value < 0)
+            return WrapWithColor($"- ${Mathf.Abs(value)}", negativeValueColor);
+
+        return WrapWithColor("$0", neutralValueColor);
+    }
+
+    private string FormatSignedValue(int value)
+    {
+        if (value > 0)
+            return WrapWithColor($"+ {value}", positiveValueColor);
+
+        if (value < 0)
+            return WrapWithColor($"- {Mathf.Abs(value)}", negativeValueColor);
+
+        return WrapWithColor("0", neutralValueColor);
+    }
+
+    private string WrapWithColor(string text, Color color)
+    {
+        return $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{text}</color>";
+    }
+
+    private IEnumerator ClockWarningShakeRoutine()
     {
         float elapsed = 0f;
 

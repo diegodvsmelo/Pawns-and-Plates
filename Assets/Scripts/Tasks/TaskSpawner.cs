@@ -587,4 +587,29 @@ public class TaskSpawner : MonoBehaviour
         return false;
     }
 
+    public void ResetForNewDay()
+    {
+        StopSpawning();
+
+        TaskPin[] allPins = FindObjectsByType<TaskPin>(FindObjectsSortMode.None);
+
+        for (int i = 0; i < allPins.Length; i++)
+        {
+            TaskPin pin = allPins[i];
+
+            if (pin == null)
+                continue;
+
+            TaskGeneratorStructure structure = pin.GetComponentInParent<TaskGeneratorStructure>();
+
+            if (structure != null)
+                structure.ClearPin(pin);
+
+            Destroy(pin.gameObject);
+        }
+
+        pendingResolvedPin = null;
+        isResultPopupOpen = false;
+    }
+    
 }

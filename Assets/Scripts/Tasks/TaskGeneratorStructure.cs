@@ -261,4 +261,15 @@ public class TaskGeneratorStructure : MonoBehaviour
         if (currentState == StructureState.Broken || currentState == StructureState.Disabled)
             currentState = StructureState.Available;
     }
+
+    public void ResetForNewDay()
+    {
+        currentPin = null;
+        currentState = StructureState.Available;
+
+        ClearAllOrderVisuals();
+
+        if (visualStateController != null)
+            visualStateController.RefreshByStructureState();
+    }
 }
