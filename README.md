@@ -258,27 +258,16 @@ Implemented / prototyped:
 - [x] Service task generates order
 - [x] Order identifies required cooking structure
 - [x] Cooking task spawns on correct structure
-- [ ] Cooking task resolves order delivery
+- [x] Cooking task resolves order delivery
 - [x] Table enters eating state
-- [ ] Table generates cleaning task or new service request
+- [x] Table generates cleaning task or new service request
 
 ### Phase 5 — Operational Flow
 
-- [ ] Cooking tasks can generate sink cleaning tasks
-- [ ] Tables can become dirty
-- [ ] Cleaning tasks free structures
-- [ ] Operational tasks can repair structures
+- [x] Tables can become dirty
+- [x] Cleaning tasks restore dirty tables to available state
 
-### Phase 6 — Structure Wear and Malfunctions
-
-- [ ] Add wear accumulation to cooking structures
-- [ ] Roll malfunction chance after cooking tasks
-- [ ] Implement temporary structure block
-- [ ] Implement penalty to next tasks
-- [ ] Generate repair tasks
-- [ ] Balance malfunction frequency and severity
-
-### Phase 7 — Daily Loop and Progression
+### Phase 6 — Daily Loop and Progression
 
 - [ ] Stop new tasks when day timer ends
 - [ ] Let active tasks finish before ending day
@@ -286,10 +275,21 @@ Implemented / prototyped:
 - [ ] Connect revenue and payroll
 - [ ] Add reputation tiers
 - [ ] Unlock team size / stations / hiring by progression
-- [ ] Implement shop cadence
 - [ ] Implement hiring cadence
+- [ ] Implement shop cadence
 
-### Phase 8 — 1.0 Systems
+### Phase 7 — Structure Wear and Malfunctions
+
+- [ ] Cooking tasks can generate sink cleaning tasks
+- [ ] Operational tasks can repair structures
+- [ ] Add wear accumulation to cooking structures
+- [ ] Roll malfunction chance after cooking tasks
+- [ ] Implement temporary structure block
+- [ ] Implement penalty to next tasks
+- [ ] Generate repair tasks
+- [ ] Balance malfunction frequency and severity
+
+### Phase 9 — 1.0 Systems
 
 - [ ] Trait system integration
 - [ ] Debuff system

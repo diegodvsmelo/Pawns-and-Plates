@@ -563,4 +563,28 @@ public class TaskSpawner : MonoBehaviour
             this.structure = structure;
         }
     }
+
+    public bool IsSpawningActive()
+    {
+        return isSpawningActive;
+    }
+
+    public bool HasActiveTasks()
+    {
+        TaskPin[] allPins = FindObjectsByType<TaskPin>(FindObjectsSortMode.None);
+
+        for (int i = 0; i < allPins.Length; i++)
+        {
+            if (allPins[i] == null)
+                continue;
+
+            if (allPins[i].CurrentState == TaskState.Completed)
+                continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
 }

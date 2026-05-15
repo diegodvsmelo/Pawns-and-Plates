@@ -458,4 +458,33 @@ public class TaskFlowManager : MonoBehaviour
 
         return taskPin.GetComponentInParent<TaskGeneratorStructure>();
     }
+
+    public bool HasUnfinishedRestaurantFlow()
+    {
+        if (pendingOrders.Count > 0)
+            return true;
+
+        if (activeEatingCoroutines.Count > 0)
+            return true;
+
+        TaskGeneratorStructure[] allStructures = FindObjectsByType<TaskGeneratorStructure>(FindObjectsSortMode.None);
+
+        for (int i = 0; i < allStructures.Length; i++)
+        {
+            TaskGeneratorStructure structure = allStructures[i];
+
+            if (structure == null)
+                continue;
+
+            if (structure.CurrentState == StructureState.WaitingForCooking ||
+                structure.CurrentState == StructureState.Eating ||
+                structure.CurrentState == StructureState.Dirty)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
 }
